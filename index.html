@@ -758,6 +758,14 @@ th{color:var(--mut);font-weight:500}
 .aqui{background:var(--pri);color:var(--onpri);border-color:var(--pri)}
 .aqui .i,.aqui .go{color:inherit;opacity:.9}
 .hide{display:none!important}
+#login{position:fixed;inset:0;z-index:3000;background:var(--bg);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:calc(40px + env(safe-area-inset-top)) 16px 24px}
+#login .lbox{width:100%;max-width:380px}
+#login h2{margin:6px 0 4px;color:var(--pri)}
+#login .llogo{font-size:44px}
+#login .btn.full{margin-top:14px}
+#lErr{margin-top:10px;color:var(--a);font-size:14px}
+.sinc{font-size:14px;line-height:1.5}
+details summary{cursor:pointer;margin-top:12px}
 .gpsAct{display:flex;gap:8px;flex-wrap:wrap}.gpsAct:not(:empty){margin-top:8px}.gpsAct .btn{padding:8px 10px;font-size:14px}
 .gpsAct .dica{font-size:12px;color:var(--mut);width:100%}
 .sheet{position:absolute;left:0;right:0;bottom:0;z-index:1100;background:var(--card);border-radius:16px 16px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,.3);padding:14px 16px 16px;max-height:80%;overflow:auto}
@@ -910,6 +918,15 @@ th{color:var(--mut);font-weight:500}
 
  <!-- dados -->
  <section id="v-mais" class="view"><div class="pad">
+  <div class="card" id="cSync">
+   <div style="font-weight:600">Usuário e sincronização</div>
+   <div class="sinc" id="sStat"></div>
+   <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="sBtn">Enviar para a nuvem</button><button type="button" class="btn" id="sSair">Trocar usuário</button></div>
+   <details id="sCfg"><summary class="muted">Configurar nuvem (administrador)</summary>
+    <label for="cfUrl">Project URL do Supabase</label><input id="cfUrl" placeholder="https://xxxx.supabase.co" autocapitalize="off">
+    <label for="cfKey">Chave pública (anon / publishable)</label><input id="cfKey" autocapitalize="off">
+    <button type="button" class="btn full" id="cfSalvar" style="margin-top:10px">Salvar configuração</button></details>
+  </div>
   <div class="card">
    <div style="font-weight:600">Exportar</div>
    <p class="muted">Exporta os registros do filtro do mapa geral (período, talhão e alvo).</p>
@@ -917,7 +934,7 @@ th{color:var(--mut);font-weight:500}
   </div>
   <div class="card">
    <div style="font-weight:600">Backup</div>
-   <p class="muted">Os dados ficam só neste aparelho. Faça backup com frequência e use para passar dados para outro celular.</p>
+   <p class="muted">Sem a nuvem, os dados ficam só neste aparelho. O backup serve como cópia extra e para passar dados sem internet.</p>
    <div class="row"><button class="btn" id="eJson">Salvar backup</button><button class="btn" id="iJsonB">Importar backup</button></div>
    <input type="file" id="iJson" accept=".json,application/json" style="display:none">
   </div>
@@ -948,6 +965,15 @@ th{color:var(--mut);font-weight:500}
  <button data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Dados</button>
 </nav>
 <div id="toast"></div>
+<div id="login" class="hide"><div class="lbox">
+ <div class="llogo">🌱</div><h2>Monitor de Lavoura</h2>
+ <p class="muted" id="lMsg"></p>
+ <div id="lCred"><label for="lEmail">E-mail</label><input id="lEmail" type="email" autocomplete="username" inputmode="email" autocapitalize="off">
+  <label for="lSenha">Senha</label><input id="lSenha" type="password" autocomplete="current-password"></div>
+ <div id="lNomeBox" class="hide"><label for="lNome">Seu nome (aparece em cada registro)</label><input id="lNome" autocomplete="name"></div>
+ <button type="button" class="btn p full" id="lBtn">Entrar</button>
+ <div id="lErr"></div>
+</div></div>
 <datalist id="dlTal"></datalist><datalist id="dlAlvo"></datalist><datalist id="dlAlvoAll"></datalist><datalist id="dlProd"></datalist><datalist id="dlEst"></datalist>
 <datalist id="dlUn"><option>lagartas/pano</option><option>percevejos/pano</option><option>adultos/folíolo</option><option>ninfas/folíolo</option><option>% folíolos com ninfas</option><option>% folíolos minados</option><option>minas/folíolo</option><option>insetos/pano</option><option>insetos/planta</option><option>% plantas atacadas</option><option>% desfolha</option><option>% severidade</option><option>% incidência</option><option>insetos/armadilha</option><option>plantas/m²</option></datalist>
 
@@ -1024,6 +1050,9 @@ function tx(store,mode,fn){return new Promise(function(res,rej){
 function getAll(){if(!db)return Promise.resolve(mem.slice());return tx("reg","readonly",function(s){return s.getAll()})}
 function put(r){if(!db){mem=mem.filter(function(x){return x.id!==r.id});mem.push(r);return Promise.resolve()}return tx("reg","readwrite",function(s){s.put(r)})}
 function del(id){if(!db){mem=mem.filter(function(x){return x.id!==id});return Promise.resolve()}return tx("reg","readwrite",function(s){s.delete(id)})}
+function salvar(r){r.pend=1;return put(r).then(function(){agendaSync()})}
+function apagar(id){var o=S.all.filter(function(x){return x.id===id})[0]||{};
+  return salvar({id:id,apagado:true,reg:o.reg,talhao:o.talhao,data:o.data,criado:o.criado,alterado:new Date().toISOString(),autorNome:o.autorNome,apagadoPor:U?U.nome:null})}
 function cfgGet(k){if(!db)return Promise.resolve(null);return tx("cfg","readonly",function(s){return s.get(k)}).then(function(v){return v?v.v:null})}
 function cfgSet(k,v){if(!db)return Promise.resolve();return tx("cfg","readwrite",function(s){s.put({k:k,v:v})})}
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -1130,7 +1159,7 @@ function resumoReg(r){var g=regDe(r);
   if(g==="plantio")return"<b>Plantio</b><br>"+esc(txtPla(r.pla));
   if(g==="aplicacao")return"<b>Aplicação</b>: "+esc(r.produto||"")+(r.dose?" ("+esc(r.dose)+")":"")+(r.alvo?" · alvo "+esc(r.alvo):"");
   return"<b>"+esc(r.alvo)+'</b> <span class="tag">'+(TIPO[r.tipo]||"")+'</span><br><span class="dot" style="background:'+COR[r.nivel]+'"></span>'+NIV[r.nivel]+(r.contagem!=null?" · "+esc(br(r.contagem))+" "+esc(r.unidade||""):"")+(r.itens&&r.itens.length?"<br>"+esc(detalhe(r)):"")+(r.acao==="recomendado"?"<br><b>Recomendado:</b> "+esc(r.produto||"")+(r.dose?" ("+esc(r.dose)+")":""):"")}
-function popup(r){return(r.posManual?'<span class="tag">marcado no mapa</span> ':"")+(r.teste?'<span class="tag" style="background:#fde3c7;color:#9a4b00">TESTE</span><br>':"")+resumoReg(r)+"<br>Talhão "+esc(r.talhao)+(r.cultura?" · "+esc(r.cultura):"")+(r.estadio&&regDe(r)!=="estadio"?" · "+esc(r.estadio):"")+"<br>"+fmtD(r.data)+
+function popup(r){return(r.posManual?'<span class="tag">marcado no mapa</span> ':"")+(r.teste?'<span class="tag" style="background:#fde3c7;color:#9a4b00">TESTE</span><br>':"")+resumoReg(r)+"<br>Talhão "+esc(r.talhao)+(r.cultura?" · "+esc(r.cultura):"")+(r.estadio&&regDe(r)!=="estadio"?" · "+esc(r.estadio):"")+"<br>"+fmtD(r.data)+(r.autorNome?" · por "+esc(r.autorNome):"")+
   (r.obs?"<br><i>"+esc(r.obs)+"</i>":"")+(r.foto?'<img src="'+r.foto+'">':"")+'<br><a href="#" data-edit="'+r.id+'">Editar</a>'}
 function renderMap(){
   if(!map)return;ptLayer.clearLayers();if(heatLayer){map.removeLayer(heatLayer);heatLayer=null}
@@ -1351,13 +1380,15 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
     criado:old?old.criado:new Date().toISOString(),alterado:new Date().toISOString()};
   if(teste||(old&&old.teste))r.teste=true;
   if(manual||(old&&old.posManual))r.posManual=true;
+  if(old&&old.autorNome){r.autor=old.autor;r.autorNome=old.autorNome;r.autorEmail=old.autorEmail;if(U&&U.nome!==old.autorNome)r.editadoPor=U.nome;else if(old.editadoPor)r.editadoPor=old.editadoPor}
+  else if(U){r.autor=U.id;r.autorNome=U.nome;r.autorEmail=U.email||null}
   if(m==="monitoramento"){var o=OC[S.oc]||{};r.tipo=o.tipo||S.tipo;r.alvo=$("alvo").value.trim();r.nivel=S.nivel;r.itens=lerInd();r.ponto=old?old.ponto:(S.ponto?S.ponto.id:null);
     if(o.soma){r.unidade=o.un;r.contagem=r.itens.length?Math.round(r.itens.reduce(function(a,b){return a+b.qtd},0)*100)/100:null}
     else if(r.itens.length){r.contagem=r.itens[0].qtd;r.unidade=r.itens[0].un}else{r.contagem=null;r.unidade=""}
     r.acao=S.acao;if(S.acao==="recomendado"){r.produto=$("produtoRec").value.trim();r.dose=$("doseRec").value.trim()}}
   else if(m==="plantio"){r.pla=pla}
   else if(m==="aplicacao"){r.acao="aplicado";r.alvo=$("alvoApl").value.trim();r.produto=$("produto").value.trim();r.dose=$("dose").value.trim();r.calda=$("calda").value.trim()}
-  put(r).then(load).then(function(){
+  salvar(r).then(load).then(function(){
     if(id){toast("Registro atualizado");go(VOLTA||"hist");return}
     if(m==="monitoramento"&&S.ponto){if(S.ponto.lat==null){S.ponto.lat=lat;S.ponto.lng=lng;S.ponto.teste=teste;S.ponto.manual=manual}S.ponto.feitos.push(S.oc);toast("Ocorrência salva");renderOcGrid();go("ocor");return}
     if(mais){toast(m==="plantio"?"Salvo. Vá para o próximo ponto":"Salvo. Lance o próximo alvo");novo(m,true);$("main").scrollTop=0;return}
@@ -1376,7 +1407,7 @@ function editar(id){var r=S.all.filter(function(x){return x.id===id})[0];if(!r)r
   $("bDel").style.display="block";go("reg")}
 $("bDel").onclick=function(){var id=$("rid").value;if(!id)return;
   if($("bDel").dataset.c!=="1"){$("bDel").dataset.c="1";$("bDel").textContent="Toque de novo para confirmar";setTimeout(function(){$("bDel").dataset.c="";$("bDel").textContent="Excluir"},3000);return}
-  $("bDel").dataset.c="";$("bDel").textContent="Excluir";$("rid").value="";del(id).then(load).then(function(){toast("Registro excluído");go(VOLTA||"hist")})};
+  $("bDel").dataset.c="";$("bDel").textContent="Excluir";$("rid").value="";apagar(id).then(load).then(function(){toast("Registro excluído");go(VOLTA||"hist")})};
 
 /* ---------- alvos e grupos ---------- */
 function especies(g){var x=GRUPOS[g];if(!x)return null;var c=$("cultura").value;return (x[c]||uniq(x.Soja.concat(x.Milho))).slice()}
@@ -1434,11 +1465,12 @@ function linhaReg(r){var g=regDe(r),cor=corReg(r);
   if(g==="plantio")sub+=" · "+esc(txtPla(r.pla));
   if(g==="aplicacao")sub+=(r.dose?" · "+esc(r.dose):"")+(r.alvo?" · alvo "+esc(r.alvo):"");
   if(r.teste)tit+=' <span class="tag" style="background:#fde3c7;color:#9a4b00">TESTE</span>';
+  if(r.autorNome)sub+=" · por "+esc(r.autorNome)+(r.editadoPor?" (editado por "+esc(r.editadoPor)+")":"");
   return'<div class="card item" data-edit="'+r.id+'">'+(r.foto?'<img src="'+r.foto+'">':"")+'<div style="flex:1"><div class="t"><span class="dot" style="background:'+cor+'"></span>'+tit+'</div><div class="s">'+sub+'</div>'+
     (r.itens&&r.itens.length?'<div class="s">'+esc(detalhe(r))+'</div>':"")+(r.acao==="recomendado"?'<div class="s"><b>Recomendado:</b> '+esc(r.produto||"")+" "+esc(r.dose||"")+'</div>':"")+'</div></div>'}
 function renderHist(){
   var q=$("hBusca").value.trim().toLowerCase(),per=$("hPer").value,t=$("hTal").value;
-  var rs=S.all.filter(function(r){return noPeriodo(r,per)&&(!t||r.talhao===t)&&(!q||[r.alvo,r.talhao,r.cultura,r.produto,r.obs,r.estadio,r.reg==="plantio"?"plantio":""].join(" ").toLowerCase().indexOf(q)>=0)})
+  var rs=S.all.filter(function(r){return noPeriodo(r,per)&&(!t||r.talhao===t)&&(!q||[r.alvo,r.talhao,r.cultura,r.produto,r.obs,r.estadio,r.autorNome,r.reg==="plantio"?"plantio":""].join(" ").toLowerCase().indexOf(q)>=0)})
     .sort(function(a,b){return natCmp(b.data+b.criado,a.data+a.criado)});
   var g={};rs.filter(function(r){return regDe(r)==="monitoramento"}).forEach(function(r){var k=r.talhao+"|"+r.alvo;(g[k]=g[k]||{t:r.talhao,a:r.alvo,n:0,s:0,mx:0});var x=g[k];x.n++;x.s+=r.nivel;x.mx=Math.max(x.mx,r.nivel)});
   var ap={};rs.filter(function(r){return regDe(r)==="aplicacao"}).forEach(function(r){ap[r.talhao]=(ap[r.talhao]||0)+1});
@@ -1451,19 +1483,19 @@ $("hBusca").oninput=renderHist;$("hPer").onchange=renderHist;$("hTal").onchange=
 
 /* ---------- carga ---------- */
 function fillSel(id,vals,first){var s=$(id),cur=s.value;s.innerHTML='<option value="">'+first+'</option>'+vals.map(function(v){return'<option>'+esc(v)+'</option>'}).join("");if(vals.indexOf(cur)>=0)s.value=cur}
-function load(){return getAll().then(function(a){S.all=(a||[]);
+function load(){return getAll().then(function(a){a=a||[];S.pend=a.filter(function(r){return r.pend}).length;S.all=a.filter(function(r){return!r.apagado});
   var tal=uniq(S.all.map(function(r){return r.talhao}).concat(S.tal?S.tal.features.map(nomeTal):[]));
   fillSel("fTal",tal,"Todos talhões");fillSel("hTal",tal,"Todos");fillSel("fAlvo",uniq(S.all.map(function(r){return r.alvo})),"Todos alvos");
   fillDl("dlTal",tal);fillAlvos();fillDl("dlProd",uniq(S.all.map(function(r){return r.produto})));
-  $("cnt").textContent=S.all.length+" reg.";renderMap();updDist();if(VIEW==="hist")renderHist();if(VIEW==="talhoes")renderTalhoes()})}
+  $("cnt").textContent=S.all.length+" reg."+(S.pend&&nuvemOk()?" · "+S.pend+" ↑":"");statusSync();renderMap();updDist();if(VIEW==="hist")renderHist();if(VIEW==="talhoes")renderTalhoes()})}
 
 /* ---------- exportação ---------- */
-var COLS=["registro","data","talhao","cultura","estadio","tipo","alvo","detalhe","nivel_texto","contagem","unidade","acao","produto","dose","calda","pop_alvo_ha","pop_real_ha","plantas_m","dif_alvo_pct","cv_pct","normais_pct","duplos_pct","falhas_pct","uniformidade","esp_linhas_m","n_medidas","lat","lng","precisao","obs"];
+var COLS=["registro","data","autor","talhao","cultura","estadio","tipo","alvo","detalhe","nivel_texto","contagem","unidade","acao","produto","dose","calda","pop_alvo_ha","pop_real_ha","plantas_m","dif_alvo_pct","cv_pct","normais_pct","duplos_pct","falhas_pct","uniformidade","esp_linhas_m","n_medidas","lat","lng","precisao","obs"];
 var PCOL={pop_alvo_ha:"alvoHa",pop_real_ha:"ha",plantas_m:"pm",dif_alvo_pct:"dif",cv_pct:"cv",normais_pct:"norm",duplos_pct:"dup",falhas_pct:"fal",uniformidade:"classe",esp_linhas_m:"esp"};
 $("eCsv").onclick=function(){var rs=filtrados();if(!rs.length){toast("Nada para exportar no filtro");return}
   var c=function(v){v=v==null?"":String(v);return/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   var lin=[COLS.join(";")].concat(rs.map(function(r){var g=regDe(r);return COLS.map(function(k){var v=PCOL[k]?(r.pla?r.pla[PCOL[k]]:null):r[k];if(k==="n_medidas")v=r.pla&&r.pla.dists?r.pla.dists.length:null;if(typeof v==="number"&&k!=="lat"&&k!=="lng")v=br(v);
-    if(k==="registro")v=REG[g];if(k==="detalhe")v=detalhe(r);if(k==="nivel_texto")v=g==="monitoramento"?NIV[r.nivel]:"";if(k==="data")v=fmtD(v);
+    if(k==="registro")v=REG[g];if(k==="autor")v=r.autorNome||"";if(k==="detalhe")v=detalhe(r);if(k==="nivel_texto")v=g==="monitoramento"?NIV[r.nivel]:"";if(k==="data")v=fmtD(v);
     if((k==="lat"||k==="lng"||k==="contagem")&&v!=null)v=br(v);if(k==="tipo")v=g==="monitoramento"?TIPO[v]:"";if(k==="acao")v=v==="recomendado"?"Recomendado":v==="aplicado"?"Aplicado":"";return c(v)}).join(";")}));
   download("monitoramento_"+hoje()+".csv","﻿"+lin.join("\r\n"),"text/csv;charset=utf-8");toast(rs.length+" registros exportados")};
 $("eKml").onclick=function(){var rs=filtrados();if(!rs.length){toast("Nada para exportar no filtro");return}
@@ -1474,11 +1506,11 @@ $("eKml").onclick=function(){var rs=filtrados();if(!rs.length){toast("Nada para 
       var ds=fmtD(r.data)+" | Talhão "+r.talhao+(r.cultura?" | "+r.cultura:"")+(r.contagem!=null?" | "+br(r.contagem)+" "+(r.unidade||""):"")+(r.itens&&r.itens.length?" | "+detalhe(r):"")+(r.produto?" | "+r.produto+" "+(r.dose||""):"")+(r.obs?" | "+r.obs:"");
       return'<Placemark><name>'+esc(nm)+'</name><styleUrl>#'+(g==="plantio"?"pla":g==="estadio"?"est":g==="aplicacao"?"apl":"n"+r.nivel)+'</styleUrl><description>'+esc(ds)+'</description><Point><coordinates>'+r.lng+','+r.lat+',0</coordinates></Point></Placemark>'}).join("")+'</Document></kml>';
   download("monitoramento_"+hoje()+".kml",x,"application/vnd.google-earth.kml+xml");toast(rs.length+" registros exportados")};
-$("eJson").onclick=function(){cfgGet("talhoes").then(function(t){download("backup_monitor_"+hoje()+".json",JSON.stringify({app:"monitor-lavoura",v:2,exportado:new Date().toISOString(),registros:S.all,talhoes:t||null}),"application/json");toast("Backup gerado")})};
+$("eJson").onclick=function(){cfgGet("talhoes").then(function(t){download("backup_monitor_"+hoje()+".json",JSON.stringify({app:"monitor-lavoura",v:2,exportado:new Date().toISOString(),registros:S.all.map(function(r){var c=Object.assign({},r);delete c.pend;return c}),talhoes:t||null}),"application/json");toast("Backup gerado")})};
 $("iJsonB").onclick=function(){$("iJson").click()};
 $("iJson").onchange=function(){var f=this.files[0];if(!f)return;f.text().then(function(t){var o=JSON.parse(t),rs=(o&&o.registros)||[];
   if(!Array.isArray(rs))throw new Error("arquivo inválido");var n=0,p=Promise.resolve();
-  rs.forEach(function(r){if(r&&r.id&&r.data){var old=S.all.filter(function(x){return x.id===r.id})[0];if(!old||(r.alterado||"")>(old.alterado||"")){n++;p=p.then(function(){return put(r)})}}});
+  rs.forEach(function(r){if(r&&r.id&&r.data){var old=S.all.filter(function(x){return x.id===r.id})[0];if(!old||(r.alterado||"")>(old.alterado||"")){n++;p=p.then(function(){return salvar(r)})}}});
   if(o.talhoes)p=p.then(function(){return cfgSet("talhoes",o.talhoes)}).then(drawTal);
   return p.then(load).then(function(){toast(n+" registros importados/atualizados")})}).catch(function(e){toast("Não consegui importar: "+e.message)});this.value=""};
 
@@ -1510,7 +1542,104 @@ function pontoTeste(t){if(!S.tal)return null;var fs=S.tal.features.filter(functi
 $("delTeste").onclick=function(){var b=$("delTeste"),ids=S.all.filter(function(r){return r.teste}).map(function(r){return r.id});
   if(!ids.length){toast("Nenhum registro de teste");return}
   if(b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Toque de novo para apagar "+ids.length+" registro(s)";setTimeout(function(){b.dataset.c="";b.textContent="Apagar registros de teste"},3000);return}
-  b.dataset.c="";b.textContent="Apagar registros de teste";var p=Promise.resolve();ids.forEach(function(id){p=p.then(function(){return del(id)})});p.then(load).then(function(){toast(ids.length+" registros de teste apagados")})};
+  b.dataset.c="";b.textContent="Apagar registros de teste";var p=Promise.resolve();ids.forEach(function(id){p=p.then(function(){return apagar(id)})});p.then(load).then(function(){toast(ids.length+" registros de teste apagados")})};
+
+/* ---------- usuário e nuvem (Supabase) ---------- */
+var SUPA_URL="", SUPA_KEY="";
+var PUXAR=false; /* false: cada aparelho só envia; a equipe vê tudo no painel do Supabase */
+function nuvem(){return{url:(SUPA_URL||lsGet("ml_supa_url")||"").trim().replace(/\/+$/,""),key:(SUPA_KEY||lsGet("ml_supa_key")||"").trim()}}
+function nuvemOk(){var n=nuvem();return!!(n.url&&n.key)}
+var U=null;try{U=JSON.parse(lsGet("ml_sess")||"null")}catch(e){U=null}
+function guardaU(){lsSet("ml_sess",JSON.stringify(U))}
+function precisaLogin(){return!U||!U.nome||(nuvemOk()&&U.local)}
+function api(path,o){o=o||{};var n=nuvem(),h={"apikey":n.key,"Content-Type":"application/json"};
+  if(o.auth!==false&&U&&U.at)h.Authorization="Bearer "+U.at;Object.assign(h,o.h||{});
+  var ac=window.AbortController?new AbortController():null,tm=setTimeout(function(){ac&&ac.abort()},o.tempo||30000);
+  return fetch(n.url+path,{method:o.m||"GET",headers:h,body:o.b!=null?JSON.stringify(o.b):undefined,signal:ac?ac.signal:undefined})
+    .then(function(res){clearTimeout(tm);return res.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}
+      if(!res.ok){var er=new Error((j&&(j.error_description||j.msg||j.message||j.error))||("HTTP "+res.status));er.status=res.status;throw er}return j})},
+      function(e){clearTimeout(tm);var er=new Error("Sem conexão com a nuvem");er.rede=true;throw er})}
+function sessao(j){var u=j.user||{},m=u.user_metadata||{};
+  U={id:u.id,email:u.email,nome:m.nome||(U&&U.email===u.email?U.nome:null),at:j.access_token,rt:j.refresh_token,exp:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600)};guardaU()}
+function renova(forca){if(!U||U.local||!U.rt)return Promise.reject(new Error("Entre de novo para sincronizar"));
+  if(!forca&&U.exp&&U.exp*1000>Date.now()+90000)return Promise.resolve();
+  return api("/auth/v1/token?grant_type=refresh_token",{m:"POST",auth:false,b:{refresh_token:U.rt}}).then(sessao,function(e){
+    if(!e.rede){U.rt=null;U.at=null;guardaU();e.message="Sessão expirada. Toque em Trocar usuário e entre de novo"}throw e})}
+
+/* tela de login */
+var lPasso="cred";
+function mostraLogin(){var cloud=nuvemOk();$("login").classList.remove("hide");$("lErr").textContent="";
+  lPasso=cloud&&!(U&&!U.local&&U.at&&!U.nome)?"cred":"nome";
+  $("lCred").classList.toggle("hide",lPasso!=="cred");$("lNomeBox").classList.toggle("hide",lPasso!=="nome");
+  $("lMsg").textContent=lPasso==="cred"?"Entre com o e-mail e a senha que o administrador criou para você. Depois do primeiro acesso, o app funciona sem internet."
+    :cloud?"Primeiro acesso: como você quer aparecer nos registros?":"Digite seu nome. Ele fica gravado em cada registro feito neste aparelho.";
+  $("lBtn").textContent=lPasso==="cred"?"Entrar":"Continuar";if(U&&U.email)$("lEmail").value=U.email;if(U&&U.nome)$("lNome").value=U.nome}
+function fechaLogin(){$("login").classList.add("hide");statusSync();if(VIEW)go(VIEW);agendaSync(500)}
+$("lBtn").onclick=function(){var b=$("lBtn");$("lErr").textContent="";
+  if(lPasso==="nome"){var nm=$("lNome").value.trim().replace(/\s+/g," ");if(nm.length<2){$("lErr").textContent="Digite seu nome";return}
+    if(!nuvemOk()){U={id:"local-"+uid(),nome:nm,local:true};guardaU();fechaLogin();toast("Olá, "+nm.split(" ")[0]);return}
+    b.disabled=true;renova().then(function(){return api("/auth/v1/user",{m:"PUT",b:{data:{nome:nm}}})}).then(function(){U.nome=nm;guardaU();fechaLogin();toast("Olá, "+nm.split(" ")[0])})
+      .catch(function(e){$("lErr").textContent="Não consegui gravar o nome: "+e.message}).then(function(){b.disabled=false});return}
+  var em=$("lEmail").value.trim().toLowerCase(),sn=$("lSenha").value;if(!em||!sn){$("lErr").textContent="Preencha e-mail e senha";return}
+  b.disabled=true;b.textContent="Entrando…";
+  api("/auth/v1/token?grant_type=password",{m:"POST",auth:false,b:{email:em,password:sn}}).then(function(j){sessao(j);$("lSenha").value="";
+    if(!U.nome){mostraLogin();return}fechaLogin();toast("Olá, "+U.nome.split(" ")[0])})
+   .catch(function(e){$("lErr").textContent=e.rede?"Sem internet. O primeiro acesso precisa de sinal.":/invalid/i.test(e.message)?"E-mail ou senha incorretos.":"Erro: "+e.message})
+   .then(function(){b.disabled=false;if(lPasso==="cred")b.textContent="Entrar"})};
+["lEmail","lSenha","lNome"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter")$("lBtn").click()})});
+
+/* sincronização: envia pendentes, depois baixa o que mudou na nuvem */
+var sincRodando=false,sincT=null,sincErro=null;
+function agendaSync(ms){clearTimeout(sincT);if(!nuvemOk()||!U||U.local||!U.rt)return;sincT=setTimeout(function(){sincronizar(true)},ms==null?3000:ms)}
+function limpa(r){var c=Object.assign({},r);delete c.pend;return c}
+function sincronizar(auto){if(sincRodando)return Promise.resolve();
+  if(!nuvemOk()){if(!auto)toast("Nuvem ainda não configurada");return Promise.resolve()}
+  if(!U||U.local||!U.rt){if(!auto)mostraLogin();return Promise.resolve()}
+  if(auto&&navigator.onLine===false)return Promise.resolve();
+  sincRodando=true;sincErro=null;statusSync();var env=0,rec=0;
+  return renova().then(function(){return getAll()}).then(function(a){
+    var pend=a.filter(function(r){return r.pend}),lotes=[];for(var i=0;i<pend.length;i+=15)lotes.push(pend.slice(i,i+15));
+    var p=Promise.resolve();
+    lotes.forEach(function(l){p=p.then(function(){
+      var rows=l.map(function(r){var d=limpa(r);if(!d.autorNome&&!d.apagado){d.autorNome=U.nome;d.autor=U.id;d.autorEmail=U.email}
+        return{id:r.id,dados:d,autor_nome:d.autorNome||null,alterado:d.alterado||new Date().toISOString(),apagado:!!d.apagado}});
+      return api("/rest/v1/registros?on_conflict=id",{m:"POST",b:rows,h:{Prefer:"resolution=merge-duplicates,return=minimal"},tempo:60000})
+        .then(function(){return getAll()}).then(function(cur){var w=Promise.resolve();
+          rows.forEach(function(x){var c=cur.filter(function(r){return r.id===x.id})[0];if(c&&c.pend&&(c.alterado||"")===(x.dados.alterado||"")){
+            var n=Object.assign({},x.dados);w=w.then(function(){return put(n)})}});env+=rows.length;return w})})});
+    return p}).then(function(){return getAll()}).then(function(a){
+    var loc={};a.forEach(function(r){loc[r.id]=r});
+    var cur=lsGet("ml_cursor_"+U.id)||"1970-01-01T00:00:00Z",desde=new Date(new Date(cur).getTime()-120000).toISOString(),maxS=cur;
+    function pag(de){return api("/rest/v1/registros?select=id,dados,apagado,sincronizado&sincronizado=gt."+encodeURIComponent(de)+"&order=sincronizado.asc&limit=200",{tempo:60000}).then(function(rows){
+      var w=Promise.resolve();(rows||[]).forEach(function(x){if(x.sincronizado>maxS)maxS=x.sincronizado;var d=x.dados||{};d.id=x.id;if(x.apagado)d.apagado=true;
+        var l=loc[x.id];if(l&&l.pend&&(l.alterado||"")>=(d.alterado||""))return;if(l&&!l.pend&&(l.alterado||"")===(d.alterado||"")&&!!l.apagado===!!d.apagado)return;
+        loc[x.id]=d;rec++;w=w.then(function(){return put(d)})});
+      return w.then(function(){if(rows&&rows.length===200)return pag(rows[rows.length-1].sincronizado)})})}
+    if(!PUXAR)return;
+    return pag(desde).then(function(){lsSet("ml_cursor_"+U.id,maxS)})})
+  .then(function(){lsSet("ml_ultSinc",new Date().toISOString());sincRodando=false;return load()}).then(function(){
+      if(!auto||rec)toast(env?"Enviado(s) para a nuvem: "+env:"Tudo já está na nuvem")})
+  .catch(function(e){sincRodando=false;sincErro=e.message;statusSync();if(!auto||!e.rede)toast(e.message)})}
+function quando(iso){if(!iso)return"nunca";var d=new Date(iso),m=Math.round((Date.now()-d)/60000);
+  return m<1?"agora há pouco":m<60?"há "+m+" min":d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
+function statusSync(){var el=$("sStat");if(!el)return;var cloud=nuvemOk(),h="";
+  h+="👤 "+(U&&U.nome?"<b>"+esc(U.nome)+"</b>"+(U.email?" · "+esc(U.email):""):"Ninguém conectado")+"<br>";
+  if(!cloud)h+="☁️ Nuvem não configurada. Os registros ficam só neste aparelho.";
+  else if(!U||U.local||!U.rt)h+="☁️ Entre com seu e-mail para sincronizar.";
+  else{h+=(sincRodando?"🔄 Enviando…":S.pend?"⬆️ "+S.pend+" registro(s) aguardando envio":"✅ Tudo enviado")+"<br>🕒 Último envio: "+quando(lsGet("ml_ultSinc"));
+    if(sincErro&&!sincRodando)h+='<br><span style="color:var(--a)">⚠️ '+esc(sincErro)+"</span>"}
+  el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);$("sBtn").disabled=sincRodando;
+  $("sCfg").classList.toggle("hide",!!(SUPA_URL&&SUPA_KEY));var n=nuvem();if(document.activeElement!==$("cfUrl"))$("cfUrl").value=n.url;if(document.activeElement!==$("cfKey"))$("cfKey").value=n.key}
+$("sBtn").onclick=function(){sincronizar(false)};
+$("sSair").onclick=function(){var b=$("sSair");
+  if(S.pend&&nuvemOk()&&U&&!U.local&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Há "+S.pend+" não enviados. Toque de novo";setTimeout(function(){b.dataset.c="";b.textContent="Trocar usuário"},3500);return}
+  b.dataset.c="";b.textContent="Trocar usuário";var em=U&&U.email;U=em?{email:em}:null;lsSet("ml_sess","");U=null;if(em)$("lEmail").value=em;mostraLogin()};
+$("cfSalvar").onclick=function(){var u=$("cfUrl").value.trim(),k=$("cfKey").value.trim();
+  if(u&&!/^https:\/\/[^\s]+$/.test(u)){toast("O endereço deve começar com https://");return}
+  lsSet("ml_supa_url",u);lsSet("ml_supa_key",k);statusSync();toast(u&&k?"Nuvem configurada":"Configuração removida");if(precisaLogin())mostraLogin()};
+window.addEventListener("online",function(){agendaSync(1000)});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")agendaSync(1500)});
+setInterval(function(){if(document.visibilityState==="visible")agendaSync(0)},5*60000);
 
 /* ---------- tema ---------- */
 function tema(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme");setSeg("tema",v);lsSet("ml_tema",v)}
@@ -1521,7 +1650,7 @@ tema(lsGet("ml_tema")||"");
 ["fPer","fModo"].forEach(function(id){var v=lsGet("ml_"+id);if(v)$(id).value=v});
 initMap();
 openDb().then(function(){if(!db)toast("Armazenamento indisponível: dados não serão guardados");if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){})})
-  .then(drawTal).then(load).then(function(){if(!lsGet("ml_center"))fitAll();go("talhoes");startLive()});
+  .then(drawTal).then(load).then(function(){if(!lsGet("ml_center"))fitAll();go("talhoes");startLive();if(precisaLogin())mostraLogin();else agendaSync(1500)});
 })();
 </script>
 </body>
