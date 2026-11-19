@@ -769,6 +769,23 @@ th{color:var(--mut);font-weight:500}
 #login .btn.full{margin-top:14px}
 #lErr{margin-top:10px;color:var(--a);font-size:14px}
 .sinc{font-size:14px;line-height:1.5}
+.pad.wide{max-width:1280px}
+.pfil{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.pfil select{width:auto;flex:1 1 130px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi .kl{font-size:12px;color:var(--mut)}.kpi .kv{font-size:26px;font-weight:700;line-height:1.2;margin-top:2px}.kpi .ks{font-size:12px;color:var(--mut)}
+.pgrid{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}.pgrid .card{margin:0;min-width:0}
+.pgrid h3{margin:0 0 8px;font-size:15px}.pgrid .hint{font-size:12px;color:var(--mut);margin:-4px 0 8px}
+@media (min-width:900px){.pgrid{grid-template-columns:1fr 1fr}.pgrid .span2{grid-column:span 2}}
+.tw{overflow-x:auto}.tw.sc{max-height:360px;overflow-y:auto}
+.tw table th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:600;color:var(--mut);font-size:12px;padding:4px 6px;border-bottom:1px solid var(--line)}
+.tw table td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}.tw td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap}.st i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.bars{display:flex;align-items:flex-end;gap:2px;height:150px;border-bottom:1px solid var(--line);padding-top:16px}
+.bars div{flex:1;min-width:3px;background:var(--pri);border-radius:4px 4px 0 0;position:relative;cursor:default}
+.bars div:hover{opacity:.75}.bars div b{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:var(--fg)}
+.bax{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-top:4px}
+#pTip{position:fixed;z-index:2000;background:var(--fg);color:var(--bg);font-size:12px;padding:4px 8px;border-radius:6px;pointer-events:none;display:none}
 .urow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}.urow:last-child{border-bottom:0}
 .urow .un{flex:1;min-width:0;font-size:14px;line-height:1.3;overflow-wrap:anywhere}.urow .btn{padding:7px 10px;font-size:13px}
 details summary{cursor:pointer;margin-top:12px}
@@ -923,6 +940,30 @@ details summary{cursor:pointer;margin-top:12px}
   <div id="lista"></div>
  </div></section>
 
+ <!-- painel do supervisor -->
+ <section id="v-painel" class="view"><div class="pad wide">
+  <div class="pfil">
+   <select id="pPer"><option value="7">Últimos 7 dias</option><option value="15">Últimos 15 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="0">Tudo</option></select>
+   <select id="pCult"><option value="">Todas culturas</option><option>Soja</option><option>Milho</option></select>
+   <select id="pTal"><option value="">Todos talhões</option></select>
+   <select id="pAut"><option value="">Todos técnicos</option></select>
+   <select id="pCob"><option value="5">Monitorar a cada 5 dias</option><option value="7" selected>Monitorar a cada 7 dias</option><option value="10">Monitorar a cada 10 dias</option><option value="14">Monitorar a cada 14 dias</option></select>
+  </div>
+  <div class="muted" id="pInfo" style="margin:-2px 0 10px"></div>
+  <div class="kpis" id="pKpi"></div>
+  <div class="pgrid">
+   <div class="card"><h3>Equipe</h3><div class="tw" id="pEquipe"></div></div>
+   <div class="card"><h3>Pontos monitorados por dia</h3><div id="pDias"></div></div>
+   <div class="card"><h3>Talhões críticos</h3><p class="hint">Talhões com mais pontos em nível Alto no período.</p><div class="tw" id="pCrit"></div></div>
+   <div class="card"><h3>Cobertura</h3><p class="hint" id="pCobH"></p><div class="tw sc" id="pCobT"></div></div>
+   <div class="card span2"><h3>Pragas, doenças e daninhas por talhão</h3><p class="hint">Nível 0 ausente · 1 baixo · 2 médio · 3 alto. Tendência compara os últimos 7 dias com os 7 dias anteriores.</p><div class="tw sc" id="pPrag"></div></div>
+   <div class="card"><h3>Aplicações</h3><div class="tw sc" id="pApl"></div></div>
+   <div class="card"><h3>Plantio</h3><div class="tw sc" id="pPla"></div></div>
+   <div class="card span2"><h3>Estádio atual por talhão</h3><div class="tw sc" id="pEst"></div></div>
+  </div>
+  <button type="button" class="btn p full" id="pAtual" style="margin-top:12px">Atualizar dados da equipe</button>
+ </div><div id="pTip"></div></section>
+
  <!-- dados -->
  <section id="v-mais" class="view"><div class="pad">
   <div class="card" id="cSync">
@@ -975,6 +1016,7 @@ details summary{cursor:pointer;margin-top:12px}
  <button data-v="talhoes" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg>Talhões</button>
  <button data-v="mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/></svg>Mapa geral</button>
  <button data-v="hist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Histórico</button>
+ <button data-v="painel" class="hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Painel</button>
  <button data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Dados</button>
 </nav>
 <div id="toast"></div>
@@ -1103,14 +1145,14 @@ function header(){var b=$("hBack"),t=$("hTitle"),s=$("hSub");
   if(VIEW==="mapa"&&S.talSel){b.style.display="block";s.textContent=FAZENDA;t.textContent="/ "+S.talSel}
   else if(VIEW==="ocor"){b.style.display="block";s.textContent=FAZENDA+" / "+($("talhao").value||"sem talhão");t.textContent="Monitorar ponto"}
   else if(VIEW==="reg"){b.style.display="block";s.textContent=FAZENDA+" / "+($("talhao").value||"sem talhão");t.textContent=($("rid").value?"Editar · ":"")+(S.modo==="monitoramento"?nomeOc():REG[S.modo])}
-  else{b.style.display="none";s.textContent=FAZENDA;t.textContent={talhoes:"Talhões",mapa:"Mapa geral",hist:"Histórico",mais:"Dados"}[VIEW]||""}}
+  else{b.style.display="none";s.textContent=FAZENDA;t.textContent={talhoes:"Talhões",mapa:"Mapa geral",hist:"Histórico",mais:"Dados",painel:"Painel"}[VIEW]||""}}
 function go(v){VIEW=v;var navv=v==="ocor"?"talhoes":v==="reg"?(S.talSel?"talhoes":"hist"):v==="mapa"&&S.talSel?"talhoes":v;
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.v===navv)});
   document.querySelectorAll(".view").forEach(function(s){s.classList.toggle("on",s.id==="v-"+v)});
   $("mapwrap").classList.toggle("talmode",!!S.talSel);
   document.querySelector("#v-mapa .bar").classList.toggle("hide",!!S.talSel);
   if(v==="mapa"&&map){setTimeout(function(){map.invalidateSize()},50);renderMap();drawTalStyle();updDist()}
-  if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();
+  if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();
   $("main").scrollTop=0;header()}
 document.querySelector("main").id="main";
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){if(b.dataset.v==="mapa"||b.dataset.v==="talhoes")S.talSel=null;go(b.dataset.v);if(b.dataset.v==="mapa")fitAll()}});
@@ -1504,7 +1546,7 @@ function load(){return getAll().then(function(a){a=a||[];S.pend=a.filter(functio
   var aut=uniq(S.all.map(function(r){return r.autorNome||"(sem nome)"}));fillSel("fAut",aut,"Todos técnicos");fillSel("hAut",aut,"Todos");
   $("fAut").classList.toggle("hide",aut.length<2);$("hAutBox").classList.toggle("hide",aut.length<2);
   fillDl("dlTal",tal);fillAlvos();fillDl("dlProd",uniq(S.all.map(function(r){return r.produto})));
-  $("cnt").textContent=S.all.length+" reg."+(S.pend&&nuvemOk()?" · "+S.pend+" ↑":"");statusSync();renderMap();updDist();if(VIEW==="hist")renderHist();if(VIEW==="talhoes")renderTalhoes()})}
+  if(VIEW==="painel")renderPainel();$("cnt").textContent=S.all.length+" reg."+(S.pend&&nuvemOk()?" · "+S.pend+" ↑":"");statusSync();renderMap();updDist();if(VIEW==="hist")renderHist();if(VIEW==="talhoes")renderTalhoes()})}
 
 /* ---------- exportação ---------- */
 var COLS=["registro","data","autor","talhao","cultura","estadio","tipo","alvo","detalhe","nivel_texto","contagem","unidade","acao","produto","dose","calda","pop_alvo_ha","pop_real_ha","plantas_m","dif_alvo_pct","cv_pct","normais_pct","duplos_pct","falhas_pct","uniformidade","esp_linhas_m","n_medidas","lat","lng","precisao","obs"];
@@ -1647,7 +1689,8 @@ function statusSync(){var el=$("sStat");if(!el)return;var cloud=nuvemOk(),h="";
   else if(!U||U.local||!U.rt)h+="☁️ Entre com seu e-mail para sincronizar.";
   else{h+=(sincRodando?"🔄 Enviando…":S.pend?"⬆️ "+S.pend+" registro(s) aguardando envio":"✅ Tudo enviado")+"<br>🕒 Último envio: "+quando(lsGet("ml_ultSinc"))+(puxa()?"<br>👥 Supervisor: este aparelho também recebe os lançamentos da equipe":"");
     if(sincErro&&!sincRodando)h+='<br><span style="color:var(--a)">⚠️ '+esc(sincErro)+"</span>"}
-  el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);$("supBox").classList.toggle("hide",!(U&&U.sup&&cloud));$("sBtn").textContent=puxa()?"Enviar e baixar":"Enviar para a nuvem";$("sBtn").disabled=sincRodando;
+  el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);
+  var pv=!!(U&&U.sup&&cloud);document.querySelector('nav button[data-v="painel"]').classList.toggle("hide",!pv);if(!pv&&VIEW==="painel")go("talhoes");$("supBox").classList.toggle("hide",!(U&&U.sup&&cloud));$("sBtn").textContent=puxa()?"Enviar e baixar":"Enviar para a nuvem";$("sBtn").disabled=sincRodando;
   $("sCfg").classList.toggle("hide",!!(SUPA_URL&&SUPA_KEY));var n=nuvem();if(document.activeElement!==$("cfUrl"))$("cfUrl").value=n.url;if(document.activeElement!==$("cfKey"))$("cfKey").value=n.key}
 $("sBtn").onclick=function(){sincronizar(false)};
 function listaSup(){var box=$("supLista");box.innerHTML='<p class="muted">Carregando…</p>';
@@ -1670,6 +1713,91 @@ window.addEventListener("online",function(){agendaSync(1000)});
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")agendaSync(1500)});
 setInterval(function(){if(document.visibilityState==="visible")agendaSync(0)},5*60000);
 
+/* ---------- painel do supervisor ---------- */
+var DIA=864e5;
+function diasDesde(d){if(!d)return null;var a=new Date(d+"T12:00"),b=new Date(hoje()+"T12:00");return Math.round((b-a)/DIA)}
+function stTag(cor,txt){return'<span class="st"><i style="background:'+cor+'"></i>'+esc(txt)+'</span>'}
+function nivTag(n){return stTag(COR[n],NIV[n])}
+function tab(cols,rows,vazio){if(!rows.length)return'<p class="muted">'+(vazio||"Sem dados no filtro.")+'</p>';
+  return"<table><tr>"+cols.map(function(c){return"<th"+(c.n?' style="text-align:right"':"")+">"+c.t+"</th>"}).join("")+"</tr>"+rows.map(function(r){return"<tr>"+r.map(function(v,i){return"<td"+(cols[i].n?' class="n"':"")+">"+v+"</td>"}).join("")+"</tr>"}).join("")+"</table>"}
+function pf1(n){return br((Math.round(n*10)/10).toFixed(1))}
+function renderPainel(){if(!$("v-painel"))return;
+  var per=+$("pPer").value,cu=$("pCult").value,ta=$("pTal").value,au=$("pAut").value,cob=+$("pCob").value;lsSet("ml_pCob",cob);
+  var base=S.all.filter(function(r){return!r.teste&&(!cu||r.cultura===cu)&&(!au||doAut(r,au))});
+  var tals=uniq((S.tal?S.tal.features.map(nomeTal):[]).concat(S.all.map(function(r){return r.talhao})));
+  fillSel("pTal",tals,"Todos talhões");fillSel("pAut",uniq(S.all.map(function(r){return r.autorNome||"(sem nome)"})),"Todos técnicos");
+  var R0=base.filter(function(r){return noPeriodo(r,per)&&(!ta||r.talhao===ta)});
+  var mon=R0.filter(function(r){return regDe(r)==="monitoramento"});
+  // pontos (um ponto pode ter várias ocorrências)
+  var P={};mon.forEach(function(r){var k=r.ponto||r.id,p=P[k];if(!p)p=P[k]={tal:r.talhao,aut:r.autorNome||"(sem nome)",data:r.data,niv:0,alvos:[]};p.niv=Math.max(p.niv,r.nivel||0);if(r.nivel>=3)p.alvos.push(r.alvo)});
+  var pts=Object.keys(P).map(function(k){return P[k]}),nA=pts.filter(function(p){return p.niv>=3}).length;
+  var talMon=uniq(pts.map(function(p){return p.tal})),tecs=uniq(R0.map(function(r){return r.autorNome||"(sem nome)"}));
+  var apl=R0.filter(function(r){return regDe(r)==="aplicacao"});
+  // cobertura (último monitoramento em qualquer data)
+  var ult={};base.forEach(function(r){if(regDe(r)==="monitoramento"&&(!ult[r.talhao]||r.data>ult[r.talhao]))ult[r.talhao]=r.data});
+  var cobL=(ta?[ta]:tals).map(function(t){return{t:t,d:diasDesde(ult[t])}});
+  var atras=cobL.filter(function(c){return c.d==null||c.d>cob}).length;
+  $("pInfo").textContent="Dados da equipe recebidos: "+quando(lsGet("ml_ultSinc"))+". Registros de teste não entram no painel.";
+  var K=[["Pontos monitorados",pts.length,mon.length+" ocorrências lançadas"],
+    ["Talhões monitorados",talMon.length,"de "+(ta?1:tals.length)+" talhões"],
+    ["Técnicos em campo",tecs.length,tecs.slice(0,3).join(", ")+(tecs.length>3?"…":"")],
+    ["Pontos em nível Alto",pts.length?Math.round(nA/pts.length*100)+"%":"–",nA+" de "+pts.length+" pontos"],
+    ["Aplicações",apl.length,(function(n){return n+(n===1?" talhão":" talhões")})(uniq(apl.map(function(r){return r.talhao})).length)],
+    ["Talhões atrasados",atras,"sem monitorar há mais de "+cob+" dias"]];
+  $("pKpi").innerHTML=K.map(function(k){return'<div class="kpi"><div class="kl">'+k[0]+'</div><div class="kv">'+k[1]+'</div><div class="ks">'+esc(k[2])+'</div></div>'}).join("");
+  // equipe
+  var E={};pts.forEach(function(p){var e=E[p.aut]=E[p.aut]||{n:0,t:{},d:{},u:""};e.n++;e.t[p.tal]=1;e.d[p.data]=1});
+  R0.forEach(function(r){var a=r.autorNome||"(sem nome)",e=E[a]=E[a]||{n:0,t:{},d:{},u:""};if(r.data>e.u)e.u=r.data});
+  $("pEquipe").innerHTML=tab([{t:"Técnico"},{t:"Pontos",n:1},{t:"Talhões",n:1},{t:"Dias em campo",n:1},{t:"Pontos/dia",n:1},{t:"Último lançamento"}],
+    Object.keys(E).sort(function(a,b){return E[b].n-E[a].n}).map(function(a){var e=E[a],nd=Object.keys(e.d).length;
+      return[esc(a),e.n,Object.keys(e.t).length,nd,nd?pf1(e.n/nd):"–",fmtD(e.u)]}),"Nenhum lançamento no período.");
+  // pontos por dia
+  var nd=per||30,dd=[];for(var i=nd-1;i>=0;i--){var x=new Date(Date.now()-i*DIA);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());dd.push(x.toISOString().slice(0,10))}
+  if(nd>60){dd=dd.slice(-60)}
+  var cnt={};pts.forEach(function(p){cnt[p.data]=(cnt[p.data]||0)+1});var mx=Math.max.apply(null,dd.map(function(d){return cnt[d]||0}).concat([1]));
+  var im=dd.reduce(function(b,d,i){return(cnt[d]||0)>(cnt[dd[b]]||0)?i:b},0);
+  $("pDias").innerHTML=pts.length?'<div class="bars">'+dd.map(function(d,i){var v=cnt[d]||0;return'<div data-tip="'+fmtD(d)+": "+v+' ponto(s)" style="height:'+(v?Math.max(4,v/mx*100):0)+'%">'+(i===im&&v?"<b>"+v+"</b>":"")+'</div>'}).join("")+'</div><div class="bax"><span>'+fmtD(dd[0]).slice(0,5)+'</span><span>'+fmtD(dd[dd.length-1]).slice(0,5)+'</span></div>'+(nd>60?'<p class="hint" style="margin-top:6px">Mostrando os últimos 60 dias.</p>':""):'<p class="muted">Nenhum ponto no período.</p>';
+  // críticos
+  var C={};pts.forEach(function(p){var c=C[p.tal]=C[p.tal]||{n:0,a:0,al:{}};c.n++;if(p.niv>=3){c.a++;p.alvos.forEach(function(x){c.al[x]=(c.al[x]||0)+1})}});
+  $("pCrit").innerHTML=tab([{t:"Talhão"},{t:"Pontos",n:1},{t:"Em Alto",n:1},{t:"Alvos em nível Alto"}],
+    Object.keys(C).filter(function(t){return C[t].a}).sort(function(a,b){return C[b].a/C[b].n-C[a].a/C[a].n||C[b].a-C[a].a}).slice(0,10).map(function(t){var c=C[t];
+      return["<b>"+esc(t)+"</b>",c.n,Math.round(c.a/c.n*100)+"% ("+c.a+")",esc(Object.keys(c.al).sort(function(a,b){return c.al[b]-c.al[a]}).join(", "))]}),"Nenhum talhão com ponto em nível Alto no período.");
+  // cobertura
+  $("pCobH").textContent="Dias desde o último monitoramento. Meta: a cada "+cob+" dias.";
+  $("pCobT").innerHTML=tab([{t:"Talhão"},{t:"Último",n:1},{t:"Dias",n:1},{t:"Situação"}],
+    cobL.sort(function(a,b){return(b.d==null?1e9:b.d)-(a.d==null?1e9:a.d)||natCmp(a.t,b.t)}).map(function(c){
+      var st=c.d==null?stTag("#8a9590","Nunca monitorado"):c.d<=cob?stTag("#4fae55","Em dia"):c.d<=2*cob?stTag("#ef8a1f","Atrasado"):stTag("#d7392f","Muito atrasado");
+      return[esc(c.t),c.d==null?"–":fmtD(ult[c.t]),c.d==null?"–":c.d,st]}));
+  // pragas por talhão e alvo
+  var G={};mon.forEach(function(r){var k=r.talhao+"|"+r.alvo,g=G[k]=G[k]||{t:r.talhao,a:r.alvo,tipo:r.tipo,n:0,s:0,mx:0,al:0};g.n++;g.s+=r.nivel||0;g.mx=Math.max(g.mx,r.nivel||0);if(r.nivel>=3)g.al++});
+  var h7=new Date(Date.now()-7*DIA),h14=new Date(Date.now()-14*DIA);
+  function tend(t,a){var A=[],B=[];base.forEach(function(r){if(regDe(r)!=="monitoramento"||r.talhao!==t||r.alvo!==a)return;var d=new Date(r.data+"T12:00");if(d>=h7)A.push(r.nivel||0);else if(d>=h14)B.push(r.nivel||0)});
+    if(!A.length||!B.length)return'<span class="muted">–</span>';var m=function(v){return v.reduce(function(x,y){return x+y},0)/v.length},df=m(A)-m(B);
+    return Math.abs(df)<.25?"= estável":df>0?'<span style="color:#d7392f">▲</span> subiu':'<span style="color:#4fae55">▼</span> caiu'}
+  $("pPrag").innerHTML=tab([{t:"Talhão"},{t:"Alvo"},{t:"Pontos",n:1},{t:"Média",n:1},{t:"Pior"},{t:"% Alto",n:1},{t:"Tendência"}],
+    Object.keys(G).sort(function(a,b){return G[b].mx-G[a].mx||G[b].al/G[b].n-G[a].al/G[a].n||natCmp(G[a].t,G[b].t)}).map(function(k){var g=G[k];
+      return[esc(g.t),esc(g.a)+' <span class="tag">'+(TIPO[g.tipo]||"")+'</span>',g.n,pf1(g.s/g.n),nivTag(g.mx),Math.round(g.al/g.n*100)+"%",tend(g.t,g.a)]}),"Nenhum monitoramento no período.");
+  // aplicações
+  var ua={};base.forEach(function(r){if(regDe(r)==="aplicacao"&&(!ua[r.talhao]||r.data>ua[r.talhao]))ua[r.talhao]=r.data});
+  var A={};apl.forEach(function(r){var a=A[r.talhao]=A[r.talhao]||{n:0,p:{}};a.n++;if(r.produto)a.p[r.produto]=1});
+  $("pApl").innerHTML=tab([{t:"Talhão"},{t:"Aplic.",n:1},{t:"Produtos"},{t:"Dias desde a última",n:1}],
+    Object.keys(A).sort(natCmp).map(function(t){return[esc(t),A[t].n,esc(Object.keys(A[t].p).join(", ")),diasDesde(ua[t])]}),"Nenhuma aplicação no período.");
+  // plantio
+  var PL={};R0.forEach(function(r){if(regDe(r)!=="plantio"||!r.pla)return;var q=PL[r.talhao]=PL[r.talhao]||{n:0,ha:0,cv:0,ncv:0,al:0,nal:0,u:null};q.n++;q.ha+=r.pla.ha||0;
+    if(r.pla.cv!=null){q.cv+=r.pla.cv;q.ncv++}if(r.pla.alvoHa){q.al+=(r.pla.ha||0)/r.pla.alvoHa*100;q.nal++}if(!q.u||r.data>=q.u.data)q.u=r});
+  $("pPla").innerHTML=tab([{t:"Talhão"},{t:"Aval.",n:1},{t:"Plantas/ha",n:1},{t:"% do alvo",n:1},{t:"CV %",n:1},{t:"Última classe"}],
+    Object.keys(PL).sort(natCmp).map(function(t){var q=PL[t];return[esc(t),q.n,Math.round(q.ha/q.n).toLocaleString("pt-BR"),q.nal?Math.round(q.al/q.nal)+"%":"–",q.ncv?pf1(q.cv/q.ncv):"–",esc(q.u.pla.classe||"–")]}),"Nenhuma avaliação de plantio no período.");
+  // estádio atual (último registro de cada talhão, qualquer data)
+  var ES={};base.forEach(function(r){if(regDe(r)!=="estadio"||(ta&&r.talhao!==ta))return;if(!ES[r.talhao]||r.data>=ES[r.talhao].data)ES[r.talhao]=r});
+  $("pEst").innerHTML=tab([{t:"Talhão"},{t:"Cultura"},{t:"Estádio"},{t:"Registrado em",n:1},{t:"Por"}],
+    Object.keys(ES).sort(natCmp).map(function(t){var r=ES[t];return[esc(t),esc(r.cultura||""),"<b>"+esc(r.estadio||"")+"</b>",fmtD(r.data)+" ("+diasDesde(r.data)+" d)",esc(r.autorNome||"")]}),"Nenhum estádio registrado.")}
+["pPer","pCult","pTal","pAut","pCob"].forEach(function(id){$(id).onchange=renderPainel});
+(function(){var v=lsGet("ml_pCob");if(v)$("pCob").value=v})();
+$("pAtual").onclick=function(){sincronizar(false)};
+$("v-painel").addEventListener("mousemove",function(e){var t=e.target.closest("[data-tip]"),tp=$("pTip");if(!t){tp.style.display="none";return}
+  tp.textContent=t.dataset.tip;tp.style.display="block";tp.style.left=Math.min(e.clientX+12,innerWidth-150)+"px";tp.style.top=(e.clientY-30)+"px"});
+$("v-painel").addEventListener("touchstart",function(e){var t=e.target.closest("[data-tip]");if(t)toast(t.dataset.tip)},{passive:true});
+
 /* ---------- tema ---------- */
 function tema(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme");setSeg("tema",v);lsSet("ml_tema",v)}
 $("tema").querySelectorAll("button").forEach(function(b){b.onclick=function(){tema(b.dataset.v)}});
@@ -1679,7 +1807,7 @@ tema(lsGet("ml_tema")||"");
 ["fPer","fModo"].forEach(function(id){var v=lsGet("ml_"+id);if(v)$(id).value=v});
 initMap();
 openDb().then(function(){if(!db)toast("Armazenamento indisponível: dados não serão guardados");if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){})})
-  .then(drawTal).then(load).then(function(){if(!lsGet("ml_center"))fitAll();go("talhoes");startLive();if(precisaLogin())mostraLogin();else agendaSync(1500)});
+  .then(drawTal).then(load).then(function(){if(!lsGet("ml_center"))fitAll();go(U&&U.sup&&nuvemOk()&&innerWidth>=900?"painel":"talhoes");startLive();if(precisaLogin())mostraLogin();else agendaSync(1500)});
 })();
 </script>
 </body>
