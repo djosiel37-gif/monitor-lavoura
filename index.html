@@ -8,7 +8,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lavoura">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f6b3a'/%3E%3Cpath d='M32 52V30M32 30c0-10-8-15-17-15 0 10 7 15 17 15zm0 0c0-9 7-14 17-14 0 9-7 14-17 14' stroke='white' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22112%22 fill=%22%23f4f6f2%22/%3E%3Cpath d=%22M256 452s-140-128-140-238a140 140 0 0 1 280 0c0 110-140 238-140 238z%22 fill=%22%232f6b3a%22/%3E%3Cpath d=%22M256 300c-6-70 26-118 92-130-2 74-38 122-92 130z%22 fill=%22%239fd36b%22/%3E%3Cpath d=%22M256 300c-6-60-34-96-86-104 0 58 30 98 86 104z%22 fill=%22%236fbf7d%22/%3E%3Cpath d=%22M256 300v-40%22 stroke=%22%239fd36b%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22370%22 cy=%22120%22 r=%2244%22 fill=%22%23ef8a1f%22/%3E%3Ccircle cx=%22370%22 cy=%22120%22 r=%2216%22 fill=%22%23fff%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
 <title>Monitor de Lavoura</title>
 <style>/* required styles */
 
@@ -683,6 +685,8 @@ header .hb{border:0;background:none;color:inherit;font-size:22px;width:36px;heig
 header .ht{flex:1;min-width:0;line-height:1.15}
 header .ht small{display:block;font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header .ht b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+#hLogo{width:34px;height:34px;flex:0 0 auto;border-radius:9px}
+header .hb[style*="block"]+#hLogo{display:none}
 header .hr{font-size:12px;opacity:.85}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:1000}
 nav button{flex:1;border:0;background:none;color:var(--mut);padding:9px 0 8px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -795,7 +799,7 @@ details summary{cursor:pointer;margin-top:12px}
 </style>
 </head>
 <body>
-<header><button class="hb" id="hBack" aria-label="Voltar">←</button><div class="ht"><small id="hSub">Fazenda Lindos Campos</small><b id="hTitle">Talhões</b></div><span class="hr" id="cnt"></span></header>
+<header><button class="hb" id="hBack" aria-label="Voltar">←</button><img id="hLogo" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22112%22 fill=%22%23f4f6f2%22/%3E%3Cpath d=%22M256 452s-140-128-140-238a140 140 0 0 1 280 0c0 110-140 238-140 238z%22 fill=%22%232f6b3a%22/%3E%3Cpath d=%22M256 300c-6-70 26-118 92-130-2 74-38 122-92 130z%22 fill=%22%239fd36b%22/%3E%3Cpath d=%22M256 300c-6-60-34-96-86-104 0 58 30 98 86 104z%22 fill=%22%236fbf7d%22/%3E%3Cpath d=%22M256 300v-40%22 stroke=%22%239fd36b%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22370%22 cy=%22120%22 r=%2244%22 fill=%22%23ef8a1f%22/%3E%3Ccircle cx=%22370%22 cy=%22120%22 r=%2216%22 fill=%22%23fff%22/%3E%3C/svg%3E"><div class="ht"><small id="hSub">Fazenda Lindos Campos</small><b id="hTitle">Talhões</b></div><span class="hr" id="cnt"></span></header>
 <main>
  <!-- lista de talhões -->
  <section id="v-talhoes" class="view on"><div class="pad">
