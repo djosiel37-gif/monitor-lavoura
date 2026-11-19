@@ -1545,7 +1545,7 @@ $("delTeste").onclick=function(){var b=$("delTeste"),ids=S.all.filter(function(r
   b.dataset.c="";b.textContent="Apagar registros de teste";var p=Promise.resolve();ids.forEach(function(id){p=p.then(function(){return apagar(id)})});p.then(load).then(function(){toast(ids.length+" registros de teste apagados")})};
 
 /* ---------- usuário e nuvem (Supabase) ---------- */
-var SUPA_URL="", SUPA_KEY="";
+var SUPA_URL="https://lbsumzdhkdubjbghmtyi.supabase.co", SUPA_KEY="sb_publishable_d1VDPvxKVTmTUufshWe2RQ_gH0vfzpw";
 var PUXAR=false; /* false: cada aparelho só envia; a equipe vê tudo no painel do Supabase */
 function nuvem(){return{url:(SUPA_URL||lsGet("ml_supa_url")||"").trim().replace(/\/+$/,""),key:(SUPA_KEY||lsGet("ml_supa_key")||"").trim()}}
 function nuvemOk(){var n=nuvem();return!!(n.url&&n.key)}
