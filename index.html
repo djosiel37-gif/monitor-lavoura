@@ -765,6 +765,8 @@ th{color:var(--mut);font-weight:500}
 #login .btn.full{margin-top:14px}
 #lErr{margin-top:10px;color:var(--a);font-size:14px}
 .sinc{font-size:14px;line-height:1.5}
+.urow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}.urow:last-child{border-bottom:0}
+.urow .un{flex:1;min-width:0;font-size:14px;line-height:1.3;overflow-wrap:anywhere}.urow .btn{padding:7px 10px;font-size:13px}
 details summary{cursor:pointer;margin-top:12px}
 .gpsAct{display:flex;gap:8px;flex-wrap:wrap}.gpsAct:not(:empty){margin-top:8px}.gpsAct .btn{padding:8px 10px;font-size:14px}
 .gpsAct .dica{font-size:12px;color:var(--mut);width:100%}
@@ -923,6 +925,12 @@ details summary{cursor:pointer;margin-top:12px}
    <div style="font-weight:600">Usuário e sincronização</div>
    <div class="sinc" id="sStat"></div>
    <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="sBtn">Enviar para a nuvem</button><button type="button" class="btn" id="sSair">Trocar usuário</button></div>
+   <div id="supBox" class="hide" style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
+    <div style="font-weight:600">Supervisores (gerência / diretoria)</div>
+    <p class="muted" style="margin:4px 0 8px">Supervisor vê no app os lançamentos de toda a equipe. A pessoa precisa ter login criado no Supabase (Authentication › Users).</p>
+    <button type="button" class="btn full" id="supAbrir">Ver usuários e supervisores</button>
+    <div id="supLista"></div>
+   </div>
    <details id="sCfg"><summary class="muted">Configurar nuvem (administrador)</summary>
     <label for="cfUrl">Project URL do Supabase</label><input id="cfUrl" placeholder="https://xxxx.supabase.co" autocapitalize="off">
     <label for="cfKey">Chave pública (anon / publishable)</label><input id="cfKey" autocapitalize="off">
@@ -1635,9 +1643,19 @@ function statusSync(){var el=$("sStat");if(!el)return;var cloud=nuvemOk(),h="";
   else if(!U||U.local||!U.rt)h+="☁️ Entre com seu e-mail para sincronizar.";
   else{h+=(sincRodando?"🔄 Enviando…":S.pend?"⬆️ "+S.pend+" registro(s) aguardando envio":"✅ Tudo enviado")+"<br>🕒 Último envio: "+quando(lsGet("ml_ultSinc"))+(puxa()?"<br>👥 Supervisor: este aparelho também recebe os lançamentos da equipe":"");
     if(sincErro&&!sincRodando)h+='<br><span style="color:var(--a)">⚠️ '+esc(sincErro)+"</span>"}
-  el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);$("sBtn").textContent=puxa()?"Enviar e baixar da equipe":"Enviar para a nuvem";$("sBtn").disabled=sincRodando;
+  el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);$("supBox").classList.toggle("hide",!(U&&U.sup&&cloud));$("sBtn").textContent=puxa()?"Enviar e baixar":"Enviar para a nuvem";$("sBtn").disabled=sincRodando;
   $("sCfg").classList.toggle("hide",!!(SUPA_URL&&SUPA_KEY));var n=nuvem();if(document.activeElement!==$("cfUrl"))$("cfUrl").value=n.url;if(document.activeElement!==$("cfKey"))$("cfKey").value=n.key}
 $("sBtn").onclick=function(){sincronizar(false)};
+function listaSup(){var box=$("supLista");box.innerHTML='<p class="muted">Carregando…</p>';
+  return renova().then(function(){return api("/rest/v1/rpc/equipe_usuarios",{m:"POST",b:{}})}).then(function(l){l=l||[];
+    box.innerHTML=l.map(function(u){return'<div class="urow"><div class="un"><b>'+esc(u.nome||u.email)+'</b>'+(u.supervisor?' <span class="tag">supervisor</span>':"")+'<br><span class="muted">'+esc(u.email)+'</span></div>'+
+      '<button type="button" class="btn'+(u.supervisor?"":" p")+'" data-em="'+esc(u.email)+'" data-sup="'+(u.supervisor?0:1)+'">'+(u.supervisor?"Remover":"Tornar supervisor")+'</button></div>'}).join("")||'<p class="muted">Nenhum usuário.</p>';
+    box.querySelectorAll("button[data-em]").forEach(function(b){b.onclick=function(){var em=b.dataset.em,sup=b.dataset.sup==="1";
+      if(!sup&&U&&em===U.email&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Remover você mesmo? Toque de novo";return}
+      b.disabled=true;api("/rest/v1/rpc/definir_supervisor",{m:"POST",b:{p_email:em,p_sup:sup}}).then(function(){toast(sup?em+" agora é supervisor":em+" deixou de ser supervisor");
+        if(U&&em===U.email&&!sup){U.sup=false;guardaU();statusSync()}return listaSup()}).catch(function(e){b.disabled=false;toast(e.message)})}})})
+   .catch(function(e){box.innerHTML='<p class="muted" style="color:var(--a)">'+esc(/Somente/.test(e.message)?"Só supervisores podem ver esta lista.":e.message)+'</p>'})}
+$("supAbrir").onclick=listaSup;
 $("sSair").onclick=function(){var b=$("sSair");
   if(S.pend&&nuvemOk()&&U&&!U.local&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Há "+S.pend+" não enviados. Toque de novo";setTimeout(function(){b.dataset.c="";b.textContent="Trocar usuário"},3500);return}
   b.dataset.c="";b.textContent="Trocar usuário";var em=U&&U.email;U=em?{email:em}:null;lsSet("ml_sess","");U=null;if(em)$("lEmail").value=em;mostraLogin()};
