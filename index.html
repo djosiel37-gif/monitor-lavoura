@@ -933,7 +933,7 @@ details summary{cursor:pointer;margin-top:12px}
    </div>
    <div class="sticky"><button class="btn p full" type="submit" id="bSalvar">Salvar</button></div>
    <button class="btn full" type="button" id="bOutro" style="margin-top:8px">Salvar e lançar outro alvo neste ponto</button>
-   <button type="button" class="btn d full" id="bDel" style="display:none;margin-top:8px">Excluir</button><p class="muted hide" id="delAviso" style="text-align:center;margin-top:8px">Este lançamento já foi enviado. Para excluir, peça ao supervisor.</p>
+   <button type="button" class="btn d full" id="bDel" style="display:none;margin-top:8px">Excluir</button><p class="muted hide" id="delAviso" style="text-align:center;margin-top:8px">Este lançamento já foi enviado. Para excluir, peça ao administrador.</p>
   </form>
  </div></section>
 
@@ -1007,9 +1007,9 @@ details summary{cursor:pointer;margin-top:12px}
    <div class="sinc" id="sStat"></div>
    <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="sBtn">Enviar para a nuvem</button><button type="button" class="btn" id="sSair">Trocar usuário</button></div>
    <div id="supBox" class="hide" style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
-    <div style="font-weight:600">Supervisores (gerência / diretoria)</div>
-    <p class="muted" style="margin:4px 0 8px">Supervisor vê no app os lançamentos de toda a equipe. A pessoa precisa ter login criado no Supabase (Authentication › Users).</p>
-    <button type="button" class="btn full" id="supAbrir">Ver usuários e supervisores</button>
+    <div style="font-weight:600">Usuários e cargos</div>
+    <p class="muted" style="margin:4px 0 8px">Técnico: lança e vê só os próprios. Supervisão (gerência/diretoria): vê tudo e lança, sem alterar o dos outros. Administrador: faz tudo. O login precisa estar criado no Supabase (Authentication › Users).</p>
+    <button type="button" class="btn full" id="supAbrir">Ver usuários e cargos</button>
     <div id="supLista"></div>
    </div>
    <details id="sCfg"><summary class="muted">Configurar nuvem (administrador)</summary>
@@ -1421,7 +1421,7 @@ function setModo(m){S.modo=m;document.querySelectorAll(".m-mon").forEach(functio
 function ultimaCultura(t){var r=S.all.filter(function(x){return x.talhao===t&&x.cultura}).sort(function(a,b){return natCmp(b.data+b.criado,a.data+a.criado)})[0];return r?r.cultura:null}
 function ultimoEstadio(t){var r=S.all.filter(function(x){return x.talhao===t&&x.estadio}).sort(function(a,b){return natCmp(b.data+b.criado,a.data+a.criado)})[0];return r?r.estadio:""}
 function novo(m,manter){var keep=manter?{c:$("cultura").value,e:$("estadio").value,d:$("data").value,t:$("talhao").value,pa:$("pAlvo").value,pe:$("pEsp").value,pm:S.pModo}:null;
-  $("form").reset();$("rid").value="";S.foto=null;showFoto();$("bDel").style.display="none";$("delAviso").classList.add("hide");
+  $("form").reset();$("rid").value="";S.foto=null;showFoto();$("bDel").style.display="none";$("delAviso").classList.add("hide");$("bSalvar").classList.remove("hide");
   var t=keep?keep.t:(S.talSel||"");$("talhao").value=t;$("data").value=keep?keep.d:hoje();
   var c=keep?keep.c:(ultimaCultura(t)||"Soja");$("cultura").value=/^(Soja|Milho)$/.test(c)?c:"Outra";$("estadio").value=keep?keep.e:ultimoEstadio(t);
   S.tipo="praga";S.nivel=1;S.acao="monitoramento";setSeg("tipo","praga");setSeg("nivel",1);setSeg("acao","monitoramento");$("m-rec").classList.add("hide");
@@ -1465,7 +1465,7 @@ $("talhao").onchange=function(){posForm();header();travaCult()};
 $("alvo").onchange=$("alvo").oninput=function(){if(S.modo==="monitoramento"){renderBanner();renderChips()}};
 var outro=false;$("bOutro").onclick=function(){outro=true;$("bSalvar").click()};
 $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
-  var id=$("rid").value,old=id&&S.all.filter(function(x){return x.id===id})[0],m=S.modo;
+  var id=$("rid").value,old=id&&S.all.filter(function(x){return x.id===id})[0],m=S.modo;if(old&&!podeEditar(old)){toast("Só o administrador altera lançamento de outra pessoa");return}
   var lat=old?old.lat:num($("lat").value),lng=old?old.lng:num($("lng").value);
   if(!old&&m==="monitoramento"&&S.ponto&&S.ponto.lat!=null){lat=S.ponto.lat;lng=S.ponto.lng}
   var teste=false,manual=false;
@@ -1512,8 +1512,10 @@ function editar(id){var r=S.all.filter(function(x){return x.id===id})[0];if(!r)r
   if(g==="plantio"&&r.pla){var q=r.pla;S.pModo=q.modo;setSeg("pModo",q.modo);$("pAlvo").value=q.alvoHa||"";$("pEsp").value=q.esp?br(q.esp):"";S.pd=(q.dists||[]).slice();$("pCont").value=q.cont!=null?q.cont:"";$("pMet").value=q.metros!=null?br(q.metros):"";renderPla()}
   if(g==="aplicacao"){$("alvoApl").value=r.alvo||"";$("produto").value=r.produto||"";$("dose").value=r.dose||""}
   S.foto=r.foto||null;showFoto();$("gpsInfo").classList.remove("warn");$("gpsInfo").textContent="📍 Posição salva do ponto"+(r.precisao!=null?" (±"+r.precisao+" m)":"")+". Não muda ao editar.";
-  $("bDel").style.display=podeExcluir(r)?"block":"none";$("delAviso").classList.toggle("hide",podeExcluir(r));go("reg")}
-function podeExcluir(r){return!r||!!r.pend||!nuvemOk()||!U||U.local||!!U.sup}
+  var ed=podeEditar(r);$("bDel").style.display=ed&&podeExcluir(r)?"block":"none";$("delAviso").textContent=ed?"Este lançamento já foi enviado. Para excluir, peça ao administrador.":"Só leitura: lançamento de "+(r.autorNome||"outra pessoa")+". Só o administrador altera.";$("delAviso").classList.toggle("hide",ed&&podeExcluir(r));
+  $("bSalvar").classList.toggle("hide",!ed);if(!ed)$("bOutro").classList.add("hide");go("reg")}
+function podeExcluir(r){return!r||!!r.pend||!nuvemOk()||!U||U.local||!!U.adm}
+function podeEditar(r){if(!r||!nuvemOk()||!U||U.local||U.adm)return true;if(r.autor)return r.autor===U.id;if(r.autorEmail)return r.autorEmail===U.email;return true}
 $("bDel").onclick=function(){var id=$("rid").value;if(!id)return;
   if($("bDel").dataset.c!=="1"){$("bDel").dataset.c="1";$("bDel").textContent="Toque de novo para confirmar";setTimeout(function(){$("bDel").dataset.c="";$("bDel").textContent="Excluir"},3000);return}
   $("bDel").dataset.c="";$("bDel").textContent="Excluir";$("rid").value="";apagar(id).then(load).then(function(){toast("Registro excluído");go(VOLTA||"hist")})};
@@ -1670,7 +1672,7 @@ function pontoTeste(t){if(!S.tal)return null;var fs=S.tal.features.filter(functi
   for(var i=0;i<500;i++){var x=x0+Math.random()*(x1-x0),y=y0+Math.random()*(y1-y0),ok=pip(x,y,r);for(var h=1;ok&&h<pg.length;h++)if(pip(x,y,pg[h]))ok=false;if(ok)return{lat:y,lng:x}}
   return{lat:(y0+y1)/2,lng:(x0+x1)/2}}
 $("delTeste").onclick=function(){var b=$("delTeste"),tt=S.all.filter(function(r){return r.teste}),ids=tt.filter(podeExcluir).map(function(r){return r.id});
-  if(tt.length&&!ids.length){toast("Os testes já foram enviados. Só o supervisor pode apagar.");return}
+  if(tt.length&&!ids.length){toast("Os testes já foram enviados. Só o administrador pode apagar.");return}
   if(!ids.length){toast("Nenhum registro de teste");return}
   if(b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Toque de novo para apagar "+ids.length+" registro(s)";setTimeout(function(){b.dataset.c="";b.textContent="Apagar registros de teste"},3000);return}
   b.dataset.c="";b.textContent="Apagar registros de teste";var p=Promise.resolve();ids.forEach(function(id){p=p.then(function(){return apagar(id)})});p.then(load).then(function(){toast(ids.length+" registros de teste apagados")})};
@@ -1680,10 +1682,12 @@ var SUPA_URL="https://lbsumzdhkdubjbghmtyi.supabase.co", SUPA_KEY="sb_publishabl
 var PUXAR=false; /* false: cada aparelho só envia; a equipe vê tudo no painel do Supabase */
 function nuvem(){return{url:(SUPA_URL||lsGet("ml_supa_url")||"").trim().replace(/\/+$/,""),key:(SUPA_KEY||lsGet("ml_supa_key")||"").trim()}}
 function nuvemOk(){var n=nuvem();return!!(n.url&&n.key)}
-var U=null;try{U=JSON.parse(lsGet("ml_sess")||"null")}catch(e){U=null}
+var U=null;try{U=JSON.parse(lsGet("ml_sess")||"null")}catch(e){U=null}if(U&&U.adm===undefined)U.adm=!!U.sup;
 function guardaU(){lsSet("ml_sess",JSON.stringify(U))}
 function puxa(){return!!(U&&!U.local)} /* técnico recebe só os próprios (RLS); supervisor recebe a equipe */
-function checaSup(){return api("/rest/v1/rpc/sou_supervisor",{m:"POST",b:{}}).then(function(v){var sup=v===true;if(U&&!!U.sup!==sup){U.sup=sup;guardaU();statusSync();if(sup)toast("Você é supervisor: baixando dados da equipe…")}return sup},function(){return U&&U.sup})}
+function checaSup(){return api("/rest/v1/rpc/meu_cargo",{m:"POST",b:{}}).then(function(c){return c},function(e){if(e&&!e.rede&&(e.status===404||/meu_cargo|schema cache|not find/i.test(e.message)))return api("/rest/v1/rpc/sou_supervisor",{m:"POST",b:{}}).then(function(v){return v===true?"admin":"tecnico"});throw e})
+  .then(function(c){var sup=c==="admin"||c==="supervisao",adm=c==="admin";if(U&&(!!U.sup!==sup||!!U.adm!==adm)){var novoSup=sup&&!U.sup;U.sup=sup;U.adm=adm;guardaU();statusSync();if(novoSup)toast("Você é "+(adm?"administrador":"supervisão")+": baixando dados da equipe…")}return sup},function(){return U&&U.sup})}
+function nomeCargo(){return U&&U.adm?"Administrador":U&&U.sup?"Supervisão":"Técnico"}
 function precisaLogin(){return!U||!U.nome||(nuvemOk()&&U.local)}
 function api(path,o){o=o||{};var n=nuvem(),h={"apikey":n.key,"Content-Type":"application/json"};
   if(o.auth!==false&&U&&U.at)h.Authorization="Bearer "+U.at;Object.assign(h,o.h||{});
@@ -1755,36 +1759,37 @@ function sincronizar(auto){if(sincRodando)return Promise.resolve();
 /* envia; se a nuvem recusar a exclusão de um lançamento já enviado (só supervisor pode), desfaz a exclusão no aparelho */
 function postReg(rows){return api("/rest/v1/registros?on_conflict=id",{m:"POST",b:rows,h:{Prefer:"resolution=merge-duplicates,return=minimal"},tempo:60000})}
 function negado(e){return e&&!e.rede&&(e.status===401||e.status===403||/row-level security|42501/i.test(e.message))}
-var AVISO_DEL="";function enviaLote(rows){return postReg(rows).then(function(){return rows},function(e){if(!negado(e)||!rows.some(function(x){return x.apagado}))throw e;
-  var ok=[],w=Promise.resolve(),volta=0;rows.forEach(function(x){w=w.then(function(){return postReg([x]).then(function(){ok.push(x)},function(e2){if(!negado(e2)||!x.apagado)throw e2;volta++;return del(x.id)})})});
-  return w.then(function(){if(volta){lsSet("ml_cursor_"+U.id,"1970-01-01T00:00:00Z");AVISO_DEL=volta+" exclusão(ões) recusada(s): só o supervisor exclui lançamento já enviado."}return ok})})}
+var AVISO_DEL="";function enviaLote(rows){return postReg(rows).then(function(){return rows},function(e){if(!negado(e))throw e;
+  var ok=[],w=Promise.resolve(),volta=0;rows.forEach(function(x){w=w.then(function(){return postReg([x]).then(function(){ok.push(x)},function(e2){if(!negado(e2))throw e2;volta++;return del(x.id)})})});
+  return w.then(function(){if(volta){lsSet("ml_cursor_"+U.id,"1970-01-01T00:00:00Z");AVISO_DEL=volta+" alteração(ões) recusada(s): só o administrador exclui lançamento já enviado ou altera o de outra pessoa."}return ok})})}
 function quando(iso){if(!iso)return"nunca";var d=new Date(iso),m=Math.round((Date.now()-d)/60000);
   return m<1?"agora há pouco":m<60?"há "+m+" min":d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
 function statusSync(){var el=$("sStat");if(!el)return;var cloud=nuvemOk(),h="";
   h+="👤 "+(U&&U.nome?"<b>"+esc(U.nome)+"</b>"+(U.email?" · "+esc(U.email):""):"Ninguém conectado")+"<br>";
   if(!cloud)h+="☁️ Nuvem não configurada. Os registros ficam só neste aparelho.";
   else if(!U||U.local||!U.rt)h+="☁️ Entre com seu e-mail para sincronizar.";
-  else{h+=(sincRodando?"🔄 Enviando…":S.pend?"⬆️ "+S.pend+" registro(s) aguardando envio":"✅ Tudo enviado")+"<br>🕒 Último envio: "+quando(lsGet("ml_ultSinc"))+(U.sup?"<br>👥 Supervisor: este aparelho também recebe os lançamentos da equipe":"");
+  else{h+=(sincRodando?"🔄 Enviando…":S.pend?"⬆️ "+S.pend+" registro(s) aguardando envio":"✅ Tudo enviado")+"<br>🕒 Último envio: "+quando(lsGet("ml_ultSinc"))+(U.sup?"<br>👥 "+nomeCargo()+": este aparelho também recebe os lançamentos da equipe"+(U.adm?"":" (só leitura nos lançamentos dos outros)"):"");
     if(sincErro&&!sincRodando)h+='<br><span style="color:var(--a)">⚠️ '+esc(sincErro)+"</span>"}
   el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);
-  var pv=!!(U&&U.sup&&cloud);document.querySelector('nav button[data-v="painel"]').classList.toggle("hide",!pv);if(!pv&&VIEW==="painel")go("talhoes");$("supBox").classList.toggle("hide",!(U&&U.sup&&cloud));$("cPlano").classList.toggle("hide",!(U&&U.sup&&cloud));$("sBtn").textContent="Sincronizar";$("sBtn").disabled=sincRodando;
+  var pv=!!(U&&U.sup&&cloud);document.querySelector('nav button[data-v="painel"]').classList.toggle("hide",!pv);if(!pv&&VIEW==="painel")go("talhoes");var adm=!!(U&&U.adm&&cloud);$("supBox").classList.toggle("hide",!adm);$("cPlano").classList.toggle("hide",!adm);$("pPlano").classList.toggle("hide",!adm);$("sBtn").textContent="Sincronizar";$("sBtn").disabled=sincRodando;
   $("sCfg").classList.toggle("hide",!!(SUPA_URL&&SUPA_KEY));var n=nuvem();if(document.activeElement!==$("cfUrl"))$("cfUrl").value=n.url;if(document.activeElement!==$("cfKey"))$("cfKey").value=n.key}
 $("sBtn").onclick=function(){sincronizar(false)};
 function listaSup(){var box=$("supLista");box.innerHTML='<p class="muted">Carregando…</p>';
   return renova().then(function(){return api("/rest/v1/rpc/equipe_usuarios",{m:"POST",b:{}})}).then(function(l){l=l||[];
     var fz=fazendas();
-    box.innerHTML=l.map(function(u){var tem=u.fazendas||[];return'<div class="ublk"><div class="urow"><div class="un"><b>'+esc(u.nome||u.email)+'</b>'+(u.supervisor?' <span class="tag">supervisor</span>':"")+'<br><span class="muted">'+esc(u.email)+'</span></div>'+
-      '<button type="button" class="btn'+(u.supervisor?"":" p")+'" data-em="'+esc(u.email)+'" data-sup="'+(u.supervisor?0:1)+'">'+(u.supervisor?"Remover":"Tornar supervisor")+'</button></div>'+
-      (u.supervisor?'<div class="ufaz">Supervisor vê todas as fazendas.</div>':'<div class="ufaz" data-uf="'+esc(u.email)+'"><span>Fazendas:</span>'+fz.map(function(f){return'<label><input type="checkbox" value="'+esc(f.id)+'"'+(tem.indexOf(f.id)>=0?" checked":"")+'>'+esc(f.nome)+'</label>'}).join("")+
+    box.innerHTML=l.map(function(u){var tem=u.fazendas||[],cg=u.admin?"admin":u.supervisor?"supervisao":"tecnico";return'<div class="ublk"><div class="urow"><div class="un"><b>'+esc(u.nome||u.email)+'</b><br><span class="muted">'+esc(u.email)+'</span></div>'+
+      '<select class="cargo" data-em="'+esc(u.email)+'" data-v="'+cg+'">'+[["tecnico","Técnico"],["supervisao","Supervisão"],["admin","Administrador"]].map(function(o){return'<option value="'+o[0]+'"'+(o[0]===cg?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></div>'+
+      (u.supervisor?'<div class="ufaz">'+(u.admin?"Administrador: vê e altera tudo, configura fazendas, safra e usuários.":"Supervisão: vê tudo de todas as fazendas e lança manejos. Não altera o que é dos outros nem as configurações.")+'</div>':'<div class="ufaz" data-uf="'+esc(u.email)+'"><span>Fazendas:</span>'+fz.map(function(f){return'<label><input type="checkbox" value="'+esc(f.id)+'"'+(tem.indexOf(f.id)>=0?" checked":"")+'>'+esc(f.nome)+'</label>'}).join("")+
         '<span class="fzh">'+(tem.length?"":"(nenhuma marcada = vê todas)")+'</span></div>')+'</div>'}).join("")||'<p class="muted">Nenhum usuário.</p>';
     box.querySelectorAll(".ufaz[data-uf]").forEach(function(d){d.querySelectorAll("input").forEach(function(c){c.onchange=function(){
       var sel=Array.prototype.filter.call(d.querySelectorAll("input"),function(x){return x.checked}).map(function(x){return x.value});d.querySelector(".fzh").textContent=sel.length?"":"(nenhuma marcada = vê todas)";
       api("/rest/v1/rpc/definir_fazendas",{m:"POST",b:{p_email:d.dataset.uf,p_fazendas:sel}}).then(function(){toast("Fazendas de "+d.dataset.uf+" salvas")},function(e){c.checked=!c.checked;toast(/definir_fazendas|schema cache|not find/i.test(e.message)?"Rode o acesso-fazendas.sql no Supabase primeiro":"Erro: "+e.message)})}})});
-    box.querySelectorAll("button[data-em]").forEach(function(b){b.onclick=function(){var em=b.dataset.em,sup=b.dataset.sup==="1";
-      if(!sup&&U&&em===U.email&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Remover você mesmo? Toque de novo";return}
-      b.disabled=true;api("/rest/v1/rpc/definir_supervisor",{m:"POST",b:{p_email:em,p_sup:sup}}).then(function(){toast(sup?em+" agora é supervisor":em+" deixou de ser supervisor");
-        if(U&&em===U.email&&!sup){U.sup=false;guardaU();statusSync()}return listaSup()}).catch(function(e){b.disabled=false;toast(e.message)})}})})
-   .catch(function(e){box.innerHTML='<p class="muted" style="color:var(--a)">'+esc(/Somente/.test(e.message)?"Só supervisores podem ver esta lista.":e.message)+'</p>'})}
+    box.querySelectorAll("select.cargo").forEach(function(b){b.onchange=function(){var em=b.dataset.em,cg=b.value,nm={tecnico:"técnico",supervisao:"supervisão",admin:"administrador"}[cg];
+      if(U&&em===U.email&&cg!=="admin"&&!confirmaAuto(b)){b.value=b.dataset.v;return}
+      b.disabled=true;api("/rest/v1/rpc/definir_cargo",{m:"POST",b:{p_email:em,p_cargo:cg}}).then(function(){toast(em+" agora é "+nm);
+        if(U&&em===U.email){U.adm=cg==="admin";U.sup=cg!=="tecnico";guardaU();statusSync()}return listaSup()}).catch(function(e){b.disabled=false;b.value=b.dataset.v;toast(/definir_cargo|schema cache|not find/i.test(e.message)?"Rode o cargos-admin.sql no Supabase primeiro":e.message)})}})})
+   .catch(function(e){box.innerHTML='<p class="muted" style="color:var(--a)">'+esc(/Somente/.test(e.message)?"Só o administrador pode ver esta lista.":e.message)+'</p>'})}
+var autoAviso=0;function confirmaAuto(b){if(Date.now()-autoAviso<5000)return true;autoAviso=Date.now();toast("Você está tirando o seu próprio cargo de administrador. Escolha de novo em até 5 s para confirmar.");return false}
 $("supAbrir").onclick=listaSup;
 $("sSair").onclick=function(){var b=$("sSair");
   if(S.pend&&nuvemOk()&&U&&!U.local&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Há "+S.pend+" não enviados. Toque de novo";setTimeout(function(){b.dataset.c="";b.textContent="Trocar usuário"},3500);return}
@@ -1825,7 +1830,7 @@ $("pSafra").onchange=function(){S.safraVer=this.value===safraAtual()?"":this.val
 /* trava a cultura do lançamento conforme o plano da safra */
 function travaCult(){var t=$("talhao").value.trim(),c=t?culturaPlano(t):"",trava=c==="Soja"||c==="Milho";
   ["cultura","ocCult"].forEach(function(id){var el=$(id);if(trava&&!$("rid").value)el.value=c;el.disabled=trava&&!$("rid").value});
-  var msg=!t||!c?"":trava?"🔒 Cultura definida pelo supervisor para "+t+" na "+safraAtual()+": "+c:"⚠️ "+t+" está como sem cultura (pousio) na "+safraAtual()+". Confira antes de lançar.";
+  var msg=!t||!c?"":trava?"🔒 Cultura definida pelo administrador para "+t+" na "+safraAtual()+": "+c:"⚠️ "+t+" está como sem cultura (pousio) na "+safraAtual()+". Confira antes de lançar.";
   ["ocLock","regLock"].forEach(function(id){$(id).textContent=msg;$(id).classList.toggle("hide",!msg||!!$("rid").value)});
   if(trava){fillAlvos();if(VIEW==="ocor")renderOcGrid()}}
 /* busca configuração na nuvem (todos os usuários) */
