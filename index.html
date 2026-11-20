@@ -756,7 +756,7 @@ th{color:var(--mut);font-weight:500}
 .leaflet-popup-content{font-size:13px;margin:10px 12px}
 .leaflet-popup-content img{max-width:180px;border-radius:6px;display:block;margin-top:4px}
 .tl{background:none;border:0;box-shadow:none;color:#fff;font-weight:700;font-size:11px;text-shadow:0 0 3px #000,0 0 2px #000;padding:0}.tl:before{display:none}.nolbl .tl:not(.tem):not(.sel){display:none}.nolbl2 .tl:not(.sel){display:none}
-.tl.sel{font-size:14px}
+.tl.sel{font-size:14px}.tl small{display:none;font-size:10.5px;font-weight:600;line-height:1.15;opacity:.95}.lbldet .tl small,.tl.sel small{display:block}
 #photoPrev img{max-width:140px;border-radius:8px;margin-top:6px}
 .tal{display:flex;align-items:center;gap:10px;cursor:pointer}
 .tal .n{font-weight:700;font-size:16px;min-width:64px}
@@ -785,7 +785,7 @@ th{color:var(--mut);font-weight:500}
 #lErr{margin-top:10px;color:var(--a);font-size:14px}
 .sinc{font-size:14px;line-height:1.5}
 .ctx{display:flex;gap:8px;margin-bottom:10px}.ctx select{flex:1}
-.ptab td{vertical-align:middle}.ptab select{padding:5px 6px;font-size:14px;width:auto}.ptab input[type=checkbox]{width:18px;height:18px}
+.ptab td{vertical-align:middle}.ptab select{padding:5px 6px;font-size:14px;width:auto}.ptab input[type=checkbox]{width:18px;height:18px}.ptab .pldt{width:150px;padding:5px 6px;font-size:14px}.ptab .plva{width:140px;padding:5px 8px;font-size:14px}.pbulk input{width:auto;padding:6px 8px}
 .pbulk{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.pbulk select{width:auto}
 .lock{font-size:12px;color:var(--mut);margin-top:4px}
 .pad.wide{max-width:1280px}
@@ -1063,10 +1063,11 @@ details summary{cursor:pointer;margin-top:12px}
    <div class="muted" id="plSafraInfo" style="margin-top:6px"></div>
   </div>
   <div class="card">
-   <div style="font-weight:600">Cultura de cada talhão · <span id="plSafraNm"></span></div>
-   <div class="pbulk"><button type="button" class="btn" id="plTodos">Marcar todos</button><select id="plBulkC"><option value="Soja">Soja</option><option value="Milho">Milho</option><option value="Pousio">Sem cultura (pousio)</option><option value="">Não definido</option></select><button type="button" class="btn" id="plBulk">Aplicar aos marcados</button></div>
+   <div style="font-weight:600">Cultura, plantio e variedade de cada talhão · <span id="plSafraNm"></span></div>
+   <div class="pbulk"><button type="button" class="btn" id="plTodos">Marcar todos</button><select id="plBulkC"><option value="Soja">Soja</option><option value="Milho">Milho</option><option value="Pousio">Sem cultura (pousio)</option><option value="">Não definido</option><option value="_" selected>Cultura: não mudar</option></select><input type="date" id="plBulkD" title="Data de plantio"><input id="plBulkV" list="dlVar" placeholder="Variedade"><button type="button" class="btn" id="plBulk">Aplicar aos marcados</button></div>
+   <datalist id="dlVar"></datalist>
    <div class="tw sc" id="plTab" style="max-height:480px"></div>
-   <button type="button" class="btn p full" id="plSalvar" style="margin-top:10px">Salvar culturas</button>
+   <button type="button" class="btn p full" id="plSalvar" style="margin-top:10px">Salvar</button>
    <div class="muted" id="plMsg" style="margin-top:6px"></div>
   </div>
  </div></section>
@@ -1290,7 +1291,7 @@ function renderTalhoes(){var m=infoTalhoes(),q=$("tBusca").value.trim().toLowerC
   $("aqui").innerHTML=aqui?'<div class="card tal aqui" data-tal="'+esc(aqui)+'"><div class="i">Você está no talhão</div><div class="n">'+esc(aqui)+'</div><div class="go">›</div></div>':
     '<p class="muted" style="margin:0 0 10px">'+(S.fix?"Seu GPS está fora dos talhões cadastrados.":"Buscando GPS para achar o talhão onde você está…")+'</p>';
   $("tLista").innerHTML=ks.map(function(k){var x=m[k];return'<div class="card tal" data-tal="'+esc(k)+'"><div class="n">'+esc(k)+'</div><div class="i">'+
-    (x.ha?br(x.ha.toFixed(1))+" ha":"sem limite")+(culturaPlano(k)?' · <b>'+esc(culturaPlano(k)==="Pousio"?"Pousio":culturaPlano(k))+'</b>':x.cult?" · "+esc(x.cult):"")+'<br>'+(x.ult?"Último registro "+fmtD(x.ult):"Sem registros")+
+    (x.ha?br(x.ha.toFixed(1))+" ha":"sem limite")+(culturaPlano(k)||detPlano(k).va||detPlano(k).pl?' · <b>'+esc(infoPlano(k,true))+'</b>':x.cult?" · "+esc(x.cult):"")+'<br>'+(x.ult?"Último registro "+fmtD(x.ult):"Sem registros")+
     (x.pior>=0?' · <span class="dot" style="background:'+COR[x.pior]+'"></span>'+NIV[x.pior]+" (7 dias)":"")+'</div><div class="go">›</div></div>'}).join("")||'<p class="muted">Nenhum talhão encontrado.</p>'}
 $("tBusca").oninput=renderTalhoes;
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-tal]");if(t){abrirTalhao(t.dataset.tal);return}
@@ -1316,7 +1317,7 @@ function initMap(){
   layers.sat.addTo(map);
   ptLayer=L.layerGroup().addTo(map);
   map.on("click",function(e){if(S.picking)pickAt(e.latlng)});
-  function lbls(){var z=map.getZoom();$("map").classList.toggle("nolbl",z<14);$("map").classList.toggle("nolbl2",z<12)}map.on("zoomend",lbls);lbls();
+  function lbls(){var z=map.getZoom();$("map").classList.toggle("lbldet",z>=15);$("map").classList.toggle("nolbl",z<14);$("map").classList.toggle("nolbl2",z<12)}map.on("zoomend",lbls);lbls();
   map.on("moveend",function(){var m=map.getCenter();lsSet("ml_center",JSON.stringify({lat:m.lat,lng:m.lng,z:map.getZoom()}))});
   $("bLayer").onclick=function(){baseSat=!baseSat;map.removeLayer(baseSat?layers.osm:layers.sat);(baseSat?layers.sat:layers.osm).addTo(map);toast(baseSat?"Satélite":"Mapa de ruas")};
   $("bMe").onclick=function(){if(S.fix)map.setView([S.fix.lat,S.fix.lng],Math.max(map.getZoom(),16));else toast("Aguardando sinal do GPS")};
@@ -1422,7 +1423,8 @@ function riscoTal(){var m={};if(S.talSel)return m;filtrados().forEach(function(r
   x.mx=Math.max(x.mx,r.nivel||0);x.pts[r.ponto||r.id]=1;if((r.data||"")>x.ult)x.ult=r.data||""});Object.keys(m).forEach(function(k){m[k].n=Object.keys(m[k].pts).length});return m}
 function drawTalStyle(){if(!talLayer)return;var RK=riscoTal();talLayer.eachLayer(function(l){var n=l.feature&&nomeTal(l.feature),sel=S.talSel&&n===S.talSel,rk=!S.talSel&&RK[n];
   l.setStyle(S.talSel?(sel?{color:"#fff",weight:3,fillOpacity:0}:{color:"#ffe14d",weight:1,opacity:.45,fillColor:"#000",fillOpacity:.25}):rk?{color:"#ffe14d",weight:2,opacity:1,fillColor:RISCO[rk.mx],fillOpacity:.42}:{color:"#ffe14d",weight:1.5,opacity:.85,fillOpacity:.04});
-  var tt=l.getTooltip&&l.getTooltip();if(tt&&tt.getElement()){tt.getElement().classList.toggle("sel",!!sel);tt.getElement().classList.toggle("tem",!!rk)}})}
+  var tt=l.getTooltip&&l.getTooltip();if(tt&&n){var ip=infoPlano(n,true),h=esc(n)+(ip?"<small>"+esc(ip)+"</small>":"");if(tt._ultH!==h){tt._ultH=h;tt.setContent(h)}}
+  if(tt&&tt.getElement()){tt.getElement().classList.toggle("sel",!!sel);tt.getElement().classList.toggle("tem",!!rk)}})}
 function renderSide(){var el=$("mSide");if(!el||S.talSel)return;var RK=riscoTal(),info=infoTalhoes(),nomes=Object.keys(info),per=$("fPer");
   var mon=nomes.filter(function(n){return RK[n]}),pts=mon.reduce(function(a,n){return a+RK[n].n},0),alto=mon.filter(function(n){return RK[n].mx===3}).length;
   var ord=mon.slice().sort(function(a,b){return RK[b].mx-RK[a].mx||(RK[b].ult>RK[a].ult?1:RK[b].ult<RK[a].ult?-1:0)||natCmp(a,b)}).concat(nomes.filter(function(n){return!RK[n]}).sort(natCmp));
@@ -1894,7 +1896,7 @@ setInterval(function(){if(document.visibilityState==="visible")agendaSync(0)},5*
 
 /* ---------- fazendas, safras e plano de culturas ---------- */
 var FAZ_PADRAO="lindos-campos",VOLTA_PL=null;
-var CFG=(function(){try{return JSON.parse(lsGet("ml_cfg")||"null")}catch(e){return null}})()||{faz:[],safras:{},plano:{}};
+var CFG=(function(){try{return JSON.parse(lsGet("ml_cfg")||"null")}catch(e){return null}})()||{faz:[],safras:{},plano:{}};if(!CFG.det)CFG.det={};
 function fazendas(){return CFG.faz&&CFG.faz.length?CFG.faz:[{id:FAZ_PADRAO,nome:"Fazenda Lindos Campos"}]}
 S.fazId=lsGet("ml_faz")||FAZ_PADRAO;if(!fazendas().some(function(f){return f.id===S.fazId}))S.fazId=fazendas()[0].id;
 function fazAt(){return fazendas().filter(function(f){return f.id===S.fazId})[0]||fazendas()[0]}
@@ -1905,6 +1907,10 @@ S.safraVer=lsGet("ml_safraVer_"+S.fazId)||"";
 function safraVista(){return S.safraVer&&U&&U.sup?S.safraVer:safraAtual()}
 function safraDe(r){return r.safra||(fazendas().filter(function(f){return f.id===(r.fazenda||FAZ_PADRAO)})[0]||{}).safra_inicial||""}
 function noCtx(r){if((r.fazenda||FAZ_PADRAO)!==S.fazId)return false;var v=safraVista();if(!v)return true;var d=safraDe(r);return!d||d===v}
+function detPlano(t,sf){var p=(CFG.det||{})[S.fazId]||{},q=p[sf||safraAtual()]||{};return q[t]||{pl:"",va:""}}
+function dap(pl){if(!pl)return null;var d=Math.floor((Date.now()-new Date(pl+"T12:00").getTime())/864e5);return d>=0?d:null}
+function infoPlano(t,curta){var c=culturaPlano(t),d=detPlano(t),n=dap(d.pl),p=[];if(c)p.push(c==="Pousio"?"Pousio":c);if(d.va)p.push(d.va);
+  if(d.pl)p.push(n!=null?n+" DAP":"plantio "+fmtD(d.pl).slice(0,5));if(!curta&&d.pl&&n!=null)p.push("plantado "+fmtD(d.pl).slice(0,5));return p.join(" · ")}
 function culturaPlano(t,sf){var p=CFG.plano[S.fazId]||{},q=p[sf||safraAtual()]||{};return q[t]||""}
 function talhoesFaz(){var f=fazAt();return cfgGet("tal_"+f.id).then(function(g){if(g&&g.alterado===f.alterado&&g.geo)return g.geo;
   if(f.id===FAZ_PADRAO&&!f.tem_tal)return cfgGet("talhoes").then(function(x){return x||FAZ});return g&&g.geo?g.geo:(f.id===FAZ_PADRAO?FAZ:null)})}
@@ -1921,19 +1927,20 @@ $("pSafra").onchange=function(){S.safraVer=this.value===safraAtual()?"":this.val
 /* trava a cultura do lançamento conforme o plano da safra */
 function travaCult(){var t=$("talhao").value.trim(),c=t?culturaPlano(t):"",trava=c==="Soja"||c==="Milho";
   ["cultura","ocCult"].forEach(function(id){var el=$(id);if(trava&&!$("rid").value)el.value=c;el.disabled=trava&&!$("rid").value});
-  var msg=!t||!c?"":trava?"🔒 Cultura definida pelo administrador para "+t+" na "+safraAtual()+": "+c:"⚠️ "+t+" está como sem cultura (pousio) na "+safraAtual()+". Confira antes de lançar.";
+  var dd=t?detPlano(t):{},ex=(dd.va?" · "+dd.va:"")+(dd.pl?" · plantio "+fmtD(dd.pl).slice(0,5)+(dap(dd.pl)!=null?" ("+dap(dd.pl)+" DAP)":""):"");
+  var msg=!t||!c?"":trava?"🔒 Cultura definida pelo administrador para "+t+" na "+safraAtual()+": "+c+ex:"⚠️ "+t+" está como sem cultura (pousio) na "+safraAtual()+". Confira antes de lançar.";
   ["ocLock","regLock"].forEach(function(id){$(id).textContent=msg;$(id).classList.toggle("hide",!msg||!!$("rid").value)});
   if(trava){fillAlvos();if(VIEW==="ocor")renderOcGrid()}}
 /* busca configuração na nuvem (todos os usuários) */
 function puxaCfg(){if(!nuvemOk()||!U||U.local||!U.at)return Promise.resolve();
-  return Promise.all([api("/rest/v1/fazendas?select=id,nome,safra_atual,safra_inicial,alterado,tem_tal&order=nome"),api("/rest/v1/safras?select=fazenda,nome,criado&order=criado"),api("/rest/v1/plano?select=fazenda,safra,talhao,cultura")])
-   .then(function(r){var fs=r[0]||[],sf={},pl={};(r[1]||[]).forEach(function(x){(sf[x.fazenda]=sf[x.fazenda]||[]).push(x.nome)});
-     (r[2]||[]).forEach(function(x){var a=pl[x.fazenda]=pl[x.fazenda]||{},b=a[x.safra]=a[x.safra]||{};b[x.talhao]=x.cultura});
-     var antes=JSON.stringify(CFG);CFG={faz:fs,safras:sf,plano:pl};guardaCfg();
+  return Promise.all([api("/rest/v1/fazendas?select=id,nome,safra_atual,safra_inicial,alterado,tem_tal&order=nome"),api("/rest/v1/safras?select=fazenda,nome,criado&order=criado"),api("/rest/v1/plano?select=fazenda,safra,talhao,cultura,plantio,variedade").catch(function(e){if(/plantio|variedade|column/i.test(e.message)){S.semDet=true;return api("/rest/v1/plano?select=fazenda,safra,talhao,cultura")}throw e})])
+   .then(function(r){var fs=r[0]||[],sf={},pl={},dt={};(r[1]||[]).forEach(function(x){(sf[x.fazenda]=sf[x.fazenda]||[]).push(x.nome)});
+     (r[2]||[]).forEach(function(x){var a=pl[x.fazenda]=pl[x.fazenda]||{},b=a[x.safra]=a[x.safra]||{};b[x.talhao]=x.cultura;if(x.plantio||x.variedade){var c=dt[x.fazenda]=dt[x.fazenda]||{},d=c[x.safra]=c[x.safra]||{};d[x.talhao]={pl:x.plantio||"",va:x.variedade||""}}});
+     var antes=JSON.stringify(CFG);CFG={faz:fs,safras:sf,plano:pl,det:dt};guardaCfg();
      if(!fs.some(function(f){return f.id===S.fazId})&&fs.length){S.fazId=fs[0].id;lsSet("ml_faz",S.fazId)}FAZENDA=fazAt().nome;
      var w=Promise.resolve();fs.forEach(function(f){if(!f.tem_tal)return;w=w.then(function(){return cfgGet("tal_"+f.id)}).then(function(g){if(g&&g.alterado===f.alterado)return;
        return api("/rest/v1/fazendas?select=talhoes&id=eq."+encodeURIComponent(f.id),{tempo:90000}).then(function(x){if(x&&x[0]&&x[0].talhoes)return cfgSet("tal_"+f.id,{alterado:f.alterado,geo:x[0].talhoes})})})});
-     return w.then(function(){if(antes!==JSON.stringify(CFG)){header();return drawTal()}})})
+     return w.then(function(){if(antes!==JSON.stringify(CFG)){header();return drawTal().then(function(){if(VIEW==="talhoes")renderTalhoes()})}})})
    .catch(function(e){if(e.status!==404&&!/does not exist|schema cache/i.test(e.message))throw e})}
 /* tela do supervisor */
 var PL={};
@@ -1941,11 +1948,16 @@ $("dPlano").onclick=function(){VOLTA_PL="mais";go("plano")};$("pPlano").onclick=
 function renderPlano(){var fs=fazendas();$("plFaz").innerHTML=fs.map(function(f){return'<option value="'+esc(f.id)+'"'+(f.id===S.fazId?" selected":"")+'>'+esc(f.nome)+'</option>'}).join("");
   var ss=safrasFaz(),at=safraAtual();$("plSafra").innerHTML=ss.length?ss.map(function(x){return'<option'+(x===at?" selected":"")+'>'+esc(x)+'</option>'}).join(""):'<option value="">Nenhuma safra criada</option>';
   $("plSafraInfo").textContent=at?"Safra atual: "+at:"Crie a primeira safra para começar.";$("plSafraNm").textContent=at||"(crie uma safra)";
-  var nomes=uniq((S.tal?S.tal.features.map(nomeTal):[])),info=infoTalhoes();PL={};nomes.forEach(function(t){PL[t]=culturaPlano(t)});
-  $("plTab").innerHTML=nomes.length?'<table class="ptab"><tr><th></th><th>Talhão</th><th style="text-align:right">Área</th><th>Cultura</th></tr>'+nomes.map(function(t){
+  var nomes=uniq((S.tal?S.tal.features.map(nomeTal):[])),info=infoTalhoes();PL={};nomes.forEach(function(t){var d=detPlano(t);PL[t]={c:culturaPlano(t),pl:d.pl,va:d.va}});
+  var vars=uniq(Object.keys((CFG.det||{})).reduce(function(a,f){Object.keys(CFG.det[f]).forEach(function(sf){Object.keys(CFG.det[f][sf]).forEach(function(t){if(CFG.det[f][sf][t].va)a.push(CFG.det[f][sf][t].va)})});return a},[]));
+  $("dlVar").innerHTML=vars.map(function(v){return"<option>"+esc(v)+"</option>"}).join("");
+  $("plTab").innerHTML=nomes.length?'<table class="ptab"><tr><th></th><th>Talhão</th><th style="text-align:right">Área</th><th>Cultura</th><th>Plantio</th><th>Variedade</th></tr>'+nomes.map(function(t){var x=PL[t];
     return'<tr><td><input type="checkbox" data-t="'+esc(t)+'"></td><td>'+esc(t)+'</td><td class="n">'+(info[t]&&info[t].ha?br(info[t].ha.toFixed(1))+" ha":"")+'</td><td><select data-c="'+esc(t)+'">'+
-      [["","Não definido"],["Soja","Soja"],["Milho","Milho"],["Pousio","Sem cultura (pousio)"]].map(function(o){return'<option value="'+o[0]+'"'+(PL[t]===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></td></tr>'}).join("")+'</table>':'<p class="muted">Esta fazenda não tem limites de talhões. Importe o KML acima.</p>';
-  $("plTab").querySelectorAll("select[data-c]").forEach(function(sl){sl.onchange=function(){PL[sl.dataset.c]=sl.value}});
+      [["","Não definido"],["Soja","Soja"],["Milho","Milho"],["Pousio","Sem cultura (pousio)"]].map(function(o){return'<option value="'+o[0]+'"'+(x.c===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></td>'+
+      '<td><input type="date" class="pldt" data-p="'+esc(t)+'" value="'+esc(x.pl)+'"></td><td><input class="plva" data-v="'+esc(t)+'" list="dlVar" placeholder="ex: M8644" value="'+esc(x.va)+'"></td></tr>'}).join("")+'</table>':'<p class="muted">Esta fazenda não tem limites de talhões. Importe o KML acima.</p>';
+  $("plTab").querySelectorAll("select[data-c]").forEach(function(sl){sl.onchange=function(){PL[sl.dataset.c].c=sl.value}});
+  $("plTab").querySelectorAll("input[data-p]").forEach(function(i){i.onchange=function(){PL[i.dataset.p].pl=i.value}});
+  $("plTab").querySelectorAll("input[data-v]").forEach(function(i){i.oninput=function(){PL[i.dataset.v].va=i.value.trim()}});
   var dis=!at;["plSalvar","plBulk","plTodos"].forEach(function(id){$(id).disabled=dis});$("plMsg").textContent=""}
 $("plFaz").onchange=function(){mudaFaz(this.value);setTimeout(renderPlano,300)};
 $("plFazNova").onclick=function(){$("plFazBox").classList.toggle("hide")};
@@ -1965,15 +1977,20 @@ $("plSafraNova").onclick=function(){var nm=$("plSafraNome").value.trim().replace
 $("plSafraAtual").onclick=function(){var nm=$("plSafra").value,fz=fazAt();if(!nm||nm===safraAtual())return;
   gravaFaz(fz.id,{nome:fz.nome,safra_atual:nm}).then(puxaCfg).then(load).then(function(){renderPlano();toast(nm+" é a safra atual")}).catch(function(e){toast("Erro: "+e.message)})};
 $("plTodos").onclick=function(){var cs=$("plTab").querySelectorAll("input[type=checkbox]"),todos=Array.prototype.every.call(cs,function(c){return c.checked});cs.forEach(function(c){c.checked=!todos})};
-$("plBulk").onclick=function(){var v=$("plBulkC").value,n=0;$("plTab").querySelectorAll("input[type=checkbox]:checked").forEach(function(c){var t=c.dataset.t;PL[t]=v;var sl=$("plTab").querySelector('select[data-c="'+t.replace(/"/g,'\\"')+'"]');if(sl)sl.value=v;n++});toast(n?n+" talhões alterados (falta salvar)":"Marque os talhões primeiro")};
+$("plBulk").onclick=function(){var v=$("plBulkC").value,d=$("plBulkD").value,va=$("plBulkV").value.trim(),n=0;if(v==="_"&&!d&&!va){toast("Escolha cultura, data ou variedade para aplicar");return}
+  $("plTab").querySelectorAll("input[type=checkbox]:checked").forEach(function(c){var t=c.dataset.t,q=function(sel){return $("plTab").querySelector(sel+'="'+t.replace(/"/g,'\\"')+'"]')};
+    if(v!=="_"){PL[t].c=v;var sl=q('select[data-c');if(sl)sl.value=v}if(d){PL[t].pl=d;var di=q('input[data-p');if(di)di.value=d}if(va){PL[t].va=va;var vi=q('input[data-v');if(vi)vi.value=va}n++});
+  toast(n?n+" talhões alterados (falta salvar)":"Marque os talhões primeiro")};
 $("plSalvar").onclick=function(){var fz=fazAt(),sf=safraAtual(),b=this;if(!sf)return;
-  var rows=Object.keys(PL).filter(function(t){return PL[t]}).map(function(t){return{fazenda:fz.id,safra:sf,talhao:t,cultura:PL[t]}}),
-      limpar=Object.keys(PL).filter(function(t){return!PL[t]&&culturaPlano(t)});
+  var tem=function(x){return x.c||x.pl||x.va},
+      rows=Object.keys(PL).filter(function(t){return tem(PL[t])}).map(function(t){var x=PL[t],o={fazenda:fz.id,safra:sf,talhao:t,cultura:x.c||null};if(!S.semDet){o.plantio=x.pl||null;o.variedade=x.va||null}return o}),
+      limpar=Object.keys(PL).filter(function(t){var d=detPlano(t);return!tem(PL[t])&&(culturaPlano(t)||d.pl||d.va)});
+  if(S.semDet&&Object.keys(PL).some(function(t){return PL[t].pl||PL[t].va})){toast("Rode o plantio-variedade.sql no Supabase para salvar plantio e variedade");return}
   b.disabled=true;$("plMsg").textContent="Salvando…";
   renova().then(function(){return rows.length?api("/rest/v1/plano?on_conflict=fazenda,safra,talhao",{m:"POST",b:rows,h:{Prefer:"resolution=merge-duplicates,return=minimal"}}):null})
    .then(function(){var w=Promise.resolve();limpar.forEach(function(t){w=w.then(function(){return api("/rest/v1/plano?fazenda=eq."+encodeURIComponent(fz.id)+"&safra=eq."+encodeURIComponent(sf)+"&talhao=eq."+encodeURIComponent(t),{m:"DELETE"})})});return w})
-   .then(puxaCfg).then(function(){renderPlano();renderTalhoes();$("plMsg").textContent="✅ Salvo. Os técnicos recebem na próxima sincronização.";toast("Culturas salvas")})
-   .catch(function(e){$("plMsg").textContent="";toast("Erro: "+e.message)}).then(function(){b.disabled=false})};
+   .then(puxaCfg).then(function(){renderPlano();renderTalhoes();$("plMsg").textContent="✅ Salvo. Os técnicos recebem na próxima sincronização.";toast("Salvo");drawTalStyle()})
+   .catch(function(e){$("plMsg").textContent="";toast(/plantio|variedade/i.test(e.message)?"Rode o plantio-variedade.sql no Supabase primeiro":"Erro: "+e.message)}).then(function(){b.disabled=false})};
 
 /* ---------- painel do supervisor ---------- */
 var DIA=864e5;
