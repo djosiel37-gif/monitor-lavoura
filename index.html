@@ -891,10 +891,12 @@ details summary{cursor:pointer;margin-top:12px}
 
    <div class="banner m-mon" id="ocBanner"></div>
    <div class="card m-mon hide" id="alvoBox"><label style="margin-top:0" id="alvoLbl">Qual?</label><div id="alvoChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div><input id="alvo" list="dlAlvo" placeholder="Não está na lista? Digite aqui"></div>
-   <div class="m-mon"><div class="indt">Indicadores</div><div id="indList"></div></div>
+   <div class="m-mon" id="indBox"><div class="indt">Indicadores</div><div id="indList"></div></div>
    <div class="card m-mon">
-    <label style="margin-top:0">Nível de infestação</label>
-    <div class="seg lv" id="nivel"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1" class="on">Baixo</button><button type="button" data-v="2">Médio</button><button type="button" data-v="3">Alto</button></div>
+    <div id="presBox" class="hide"><label style="margin-top:0">Percevejo no ponto</label>
+     <div class="seg lv" id="pres"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1">Presente</button></div><label></label></div>
+    <div id="nivBox"><label style="margin-top:0">Nível de infestação</label>
+    <div class="seg lv" id="nivel"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1" class="on">Baixo</button><button type="button" data-v="2">Médio</button><button type="button" data-v="3">Alto</button></div></div>
     <label>Recomendação</label>
     <div class="seg" id="acao"><button type="button" data-v="monitoramento" class="on">Sem recomendação</button><button type="button" data-v="recomendado">Recomendar aplicação</button></div>
    </div>
@@ -1086,7 +1088,7 @@ var SV={bug:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
  sick:'<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 20 4c0 9-5 16-16 16z" fill="#fff"/><circle cx="10" cy="14" r="1.8" fill="#8e4f8e"/><circle cx="14" cy="10" r="1.4" fill="#8e4f8e"/><circle cx="13.5" cy="15" r="1.1" fill="#8e4f8e"/></svg>',
  weed:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 21V10M12 13C12 8 8.5 5.5 4 5.5c0 4.5 3 7.5 8 7.5zm0-3c0-4 3-6.5 8-6.5 0 4-3 6.5-8 6.5M8 21h8"/></svg>'};
 var OC={"Lagarta":{tipo:"praga",cor:"#6b8e23",ic:"bug",soma:true,un:"lagartas/pano"},
- "Percevejo":{tipo:"praga",cor:"#8b5a2b",ic:"shield",soma:true,un:"percevejos/pano"},
+ "Percevejo":{tipo:"praga",cor:"#8b5a2b",ic:"shield",soma:true,pa:true,un:"percevejos/pano"},
  "Mosca-branca":{tipo:"praga",cor:"#5f7f95",ic:"fly",ind:[["Adultos","adultos/folíolo"],["Ninfas","ninfas/folíolo"]]},
  "Larva-minadora":{tipo:"praga",cor:"#3f8a6a",ic:"mine",ind:[["Folíolos minados","% dos folíolos"],["Larvas vivas","larvas/folíolo"]]},
  "Cigarrinha-do-milho":{tipo:"praga",cor:"#a07a1a",ic:"hop",milho:true,ind:[["Adultos","insetos/planta"],["Plantas com cigarrinha","% das plantas"]]},
@@ -1220,7 +1222,7 @@ function resumoReg(r){var g=regDe(r);
   if(g==="estadio")return"<b>Estádio "+esc(r.estadio||"")+"</b>";
   if(g==="plantio")return"<b>Plantio</b><br>"+esc(txtPla(r.pla));
   if(g==="aplicacao")return"<b>Aplicação</b>: "+esc(r.produto||"")+(r.dose?" ("+esc(r.dose)+")":"")+(r.alvo?" · alvo "+esc(r.alvo):"");
-  return"<b>"+esc(r.alvo)+'</b> <span class="tag">'+(TIPO[r.tipo]||"")+'</span><br><span class="dot" style="background:'+COR[r.nivel]+'"></span>'+NIV[r.nivel]+(r.contagem!=null?" · "+esc(br(r.contagem))+" "+esc(r.unidade||""):"")+(r.itens&&r.itens.length?"<br>"+esc(detalhe(r)):"")+(r.acao==="recomendado"?"<br><b>Recomendado:</b> "+esc(r.produto||"")+(r.dose?" ("+esc(r.dose)+")":""):"")}
+  return"<b>"+esc(r.alvo)+'</b> <span class="tag">'+(TIPO[r.tipo]||"")+'</span><br><span class="dot" style="background:'+COR[r.nivel]+'"></span>'+nivTxt(r)+(r.contagem!=null&&r.presenca==null?" · "+esc(br(r.contagem))+" "+esc(r.unidade||""):"")+(r.itens&&r.itens.length?"<br>"+esc(detalhe(r)):"")+(r.acao==="recomendado"?"<br><b>Recomendado:</b> "+esc(r.produto||"")+(r.dose?" ("+esc(r.dose)+")":""):"")}
 function popup(r){return(r.posManual?'<span class="tag">marcado no mapa</span> ':"")+(r.teste?'<span class="tag" style="background:#fde3c7;color:#9a4b00">TESTE</span><br>':"")+resumoReg(r)+"<br>Talhão "+esc(r.talhao)+(r.cultura?" · "+esc(r.cultura):"")+(r.estadio&&regDe(r)!=="estadio"?" · "+esc(r.estadio):"")+"<br>"+fmtD(r.data)+(r.autorNome?" · por "+esc(r.autorNome):"")+
   (r.obs?"<br><i>"+esc(r.obs)+"</i>":"")+(r.foto?'<img src="'+r.foto+'">':"")+'<br><a href="#" data-edit="'+r.id+'">Editar</a>'}
 function renderMap(){
@@ -1393,6 +1395,10 @@ function novo(m,manter){var keep=manter?{c:$("cultura").value,e:$("estadio").val
   setModo(m);fillAlvos();renderGrupo();renderPla();posForm()}
 document.querySelectorAll("#acoes button").forEach(function(b){b.onclick=function(){VOLTA="mapa";S.manual=null;if(b.dataset.m==="monitoramento"){novoPonto();return}novo(b.dataset.m);go("reg")}});
 /* ---------- monitoramento por ponto e ocorrência ---------- */
+function ehPA(a){return!!(OC[a]&&OC[a].pa)}
+function nivTxt(r){return r.presenca!=null?(r.presenca?"Presente":"Ausente"):NIV[r.nivel]}
+function aplicaPA(){var pa=ehPA(S.oc);$("presBox").classList.toggle("hide",!pa);$("nivBox").classList.toggle("hide",pa);$("indBox").classList.toggle("hide",pa||S.modo!=="monitoramento");if(pa)setSeg("pres",S.pres==null?"":S.pres?1:0)}
+$("pres").querySelectorAll("button").forEach(function(b){b.onclick=function(){S.pres=b.dataset.v==="1";setSeg("pres",b.dataset.v)}});
 function nomeOc(){var o=OC[S.oc];return o&&o.gen?($("alvo").value.trim()||S.oc):(S.oc||"Monitoramento")}
 function novoPonto(){S.oc=null;novo("monitoramento");S.ponto={id:uid(),feitos:[]};$("ocCult").value=$("cultura").value;$("ocEst").value=$("estadio").value;renderOcGrid();go("ocor");posForm()}
 function renderOcGrid(){var c=$("ocCult").value,f=(S.ponto&&S.ponto.feitos)||[];
@@ -1404,7 +1410,7 @@ $("ocEst").oninput=function(){$("estadio").value=$("ocEst").value};
 function fimPonto(){var n=S.ponto?S.ponto.feitos.length:0;S.ponto=null;S.manual=null;if(n)toast(n+(n>1?" ocorrências salvas":" ocorrência salva")+" neste ponto");go(S.talSel?"mapa":"talhoes")}
 $("ocFim").onclick=fimPonto;
 function abrirOc(k){var c=$("ocCult").value,e=$("ocEst").value;novo("monitoramento");$("cultura").value=c;$("estadio").value=e;
-  S.oc=k;S.tipo=OC[k].tipo;$("alvo").value=OC[k].gen?"":k;$("alvoLbl").textContent=OC[k].lbl||"Qual?";fillAlvos();setModo("monitoramento");renderBanner();renderChips();renderInd();VOLTA="ocor";go("reg")}
+  S.oc=k;S.pres=null;S.tipo=OC[k].tipo;$("alvo").value=OC[k].gen?"":k;$("alvoLbl").textContent=OC[k].lbl||"Qual?";fillAlvos();setModo("monitoramento");renderBanner();renderChips();renderInd();aplicaPA();VOLTA="ocor";go("reg")}
 function renderChips(){var cv=$("cultura").value,t=S.tipo,l=[];if(ALV[cv])l=ALV[cv][t]||[];else Object.keys(ALV).forEach(function(k){(ALV[k][t]||[]).forEach(function(a){if(l.indexOf(a)<0)l.push(a)})});
   var v=$("alvo").value.trim();
   $("alvoChips").innerHTML=l.map(function(a){return'<button type="button" class="btn'+(a===v?" p":"")+'" style="padding:7px 10px;font-size:14px;white-space:normal;text-align:left" data-a="'+esc(a)+'">'+esc(a)+'</button>'}).join("");
@@ -1435,6 +1441,7 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
   if(lat==null||lng==null){toast(TESTE?"Escolha um talhão com limite no mapa":"Sem GPS. Toque em \"Marcar no mapa\"");return}
   if(!$("talhao").value.trim()){toast("Informe o talhão");return}
   if(m==="monitoramento"&&!$("alvo").value.trim()){toast("Escolha o alvo");return}
+  if(m==="monitoramento"&&ehPA(S.oc)&&S.pres==null){toast("Marque Presente ou Ausente");return}
   if(m==="estadio"&&!$("estadio").value.trim()){toast("Informe o estádio");return}
   if(m==="aplicacao"&&!$("produto").value.trim()){toast("Informe o produto");return}
   var pla=m==="plantio"?calcPla():null;if(m==="plantio"&&!pla.pm){toast(S.pModo==="dist"?"Lance pelo menos 2 distâncias":"Informe plantas e metros");return}
@@ -1448,6 +1455,7 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
   if(m==="monitoramento"){var o=OC[S.oc]||{};r.tipo=o.tipo||S.tipo;r.alvo=$("alvo").value.trim();r.nivel=S.nivel;r.itens=lerInd();r.ponto=old?old.ponto:(S.ponto?S.ponto.id:null);
     if(o.soma){r.unidade=o.un;r.contagem=r.itens.length?Math.round(r.itens.reduce(function(a,b){return a+b.qtd},0)*100)/100:null}
     else if(r.itens.length){r.contagem=r.itens[0].qtd;r.unidade=r.itens[0].un}else{r.contagem=null;r.unidade=""}
+    if(ehPA(S.oc)){r.presenca=!!S.pres;r.nivel=S.pres?1:0;r.itens=[];r.contagem=S.pres?1:0;r.unidade="presença"}
     r.acao=S.acao;if(S.acao==="recomendado"){r.produto=$("produtoRec").value.trim();r.dose=$("doseRec").value.trim()}}
   else if(m==="plantio"){r.pla=pla}
   else if(m==="aplicacao"){r.acao="aplicado";r.alvo=$("alvoApl").value.trim();r.produto=$("produto").value.trim();r.dose=$("dose").value.trim();r.calda=$("calda").value.trim()}
@@ -1463,7 +1471,7 @@ function editar(id){var r=S.all.filter(function(x){return x.id===id})[0];if(!r)r
   if(g==="monitoramento"){$("alvo").value=r.alvo||"";S.tipo=r.tipo||"praga";S.nivel=r.nivel||0;S.acao=r.acao==="recomendado"?"recomendado":"monitoramento";
     S.oc=OC[r.alvo]?r.alvo:S.tipo==="doenca"?"Doença":S.tipo==="daninha"?"Daninha":"Outra praga";$("alvoLbl").textContent=OC[S.oc].lbl||"Qual?";
     setSeg("nivel",S.nivel);setSeg("acao",S.acao);$("m-rec").classList.toggle("hide",S.acao!=="recomendado");$("produtoRec").value=r.produto||"";$("doseRec").value=r.dose||"";fillAlvos();setModo("monitoramento");
-    var it=r.itens&&r.itens.length?r.itens:(r.contagem!=null?[{alvo:indicadores(S.oc)[0].n,qtd:r.contagem,un:r.unidade}]:[]);renderBanner();renderChips();renderInd(it)}
+    var it=r.itens&&r.itens.length?r.itens:(r.contagem!=null?[{alvo:indicadores(S.oc)[0].n,qtd:r.contagem,un:r.unidade}]:[]);renderBanner();renderChips();renderInd(it);S.pres=r.presenca!=null?r.presenca:((r.nivel||0)>0||(r.contagem||0)>0);aplicaPA()}
   if(g==="plantio"&&r.pla){var q=r.pla;S.pModo=q.modo;setSeg("pModo",q.modo);$("pAlvo").value=q.alvoHa||"";$("pEsp").value=q.esp?br(q.esp):"";S.pd=(q.dists||[]).slice();$("pCont").value=q.cont!=null?q.cont:"";$("pMet").value=q.metros!=null?br(q.metros):"";renderPla()}
   if(g==="aplicacao"){$("alvoApl").value=r.alvo||"";$("produto").value=r.produto||"";$("dose").value=r.dose||""}
   S.foto=r.foto||null;showFoto();$("gpsInfo").classList.remove("warn");$("gpsInfo").textContent="📍 Posição salva do ponto"+(r.precisao!=null?" (±"+r.precisao+" m)":"")+". Não muda ao editar.";
@@ -1524,7 +1532,7 @@ function renderPla(){$("pDistBox").classList.toggle("hide",S.pModo!=="dist");$("
 function linhaReg(r){var g=regDe(r),cor=corReg(r);
   var tit=g==="plantio"?"Plantio":g==="estadio"?"Estádio "+esc(r.estadio):g==="aplicacao"?"Aplicação: "+esc(r.produto):esc(r.alvo)+' <span class="tag">'+(TIPO[r.tipo]||"")+'</span>';
   var sub=fmtD(r.data)+" · "+esc(r.talhao)+(r.cultura?" · "+esc(r.cultura):"");
-  if(g==="monitoramento")sub+=" · "+NIV[r.nivel]+(r.contagem!=null&&!(OC[r.alvo]&&!OC[r.alvo].soma&&r.itens&&r.itens.length>1)?" ("+esc(br(r.contagem))+" "+esc(r.unidade||"")+")":"");
+  if(g==="monitoramento")sub+=" · "+nivTxt(r)+(r.presenca==null&&r.contagem!=null&&!(OC[r.alvo]&&!OC[r.alvo].soma&&r.itens&&r.itens.length>1)?" ("+esc(br(r.contagem))+" "+esc(r.unidade||"")+")":"");
   if(g==="plantio")sub+=" · "+esc(txtPla(r.pla));
   if(g==="aplicacao")sub+=(r.dose?" · "+esc(r.dose):"")+(r.alvo?" · alvo "+esc(r.alvo):"");
   if(r.teste)tit+=' <span class="tag" style="background:#fde3c7;color:#9a4b00">TESTE</span>';
@@ -1539,7 +1547,7 @@ function renderHist(){
   var ap={};rs.filter(function(r){return regDe(r)==="aplicacao"}).forEach(function(r){ap[r.talhao]=(ap[r.talhao]||0)+1});
   var ks=Object.keys(g).sort(function(a,b){return g[b].mx-g[a].mx||g[b].s/g[b].n-g[a].s/g[a].n});
   $("resumo").innerHTML=ks.length?'<table><tr><th>Talhão</th><th>Alvo</th><th>Pontos</th><th>Média</th><th>Pior</th></tr>'+ks.map(function(k){var x=g[k],m=x.s/x.n;
-    return'<tr><td>'+esc(x.t)+'</td><td>'+esc(x.a)+'</td><td>'+x.n+'</td><td><span class="dot" style="background:'+COR[Math.round(m)]+'"></span>'+br(m.toFixed(1))+'</td><td>'+NIV[x.mx]+'</td></tr>'}).join("")+'</table><p class="muted" style="margin:6px 0 0">Média: 0 ausente, 1 baixo, 2 médio, 3 alto.'+
+    return'<tr><td>'+esc(x.t)+'</td><td>'+esc(x.a)+'</td><td>'+x.n+'</td><td><span class="dot" style="background:'+COR[Math.round(m)]+'"></span>'+br(m.toFixed(1))+'</td><td>'+(ehPA(x.a)?(x.mx?"Presente":"Ausente"):NIV[x.mx])+'</td></tr>'}).join("")+'</table><p class="muted" style="margin:6px 0 0">Média: 0 ausente, 1 baixo, 2 médio, 3 alto.'+
     (Object.keys(ap).length?" Aplicações no período: "+Object.keys(ap).sort(natCmp).map(function(k){return esc(k)+" ("+ap[k]+")"}).join(", ")+".":"")+'</p>':"Nenhum monitoramento no período.";
   $("lista").innerHTML=rs.map(linhaReg).join("")}
 $("hBusca").oninput=renderHist;$("hPer").onchange=renderHist;$("hTal").onchange=renderHist;
@@ -1560,14 +1568,14 @@ var PCOL={pop_alvo_ha:"alvoHa",pop_real_ha:"ha",plantas_m:"pm",dif_alvo_pct:"dif
 $("eCsv").onclick=function(){var rs=filtrados();if(!rs.length){toast("Nada para exportar no filtro");return}
   var c=function(v){v=v==null?"":String(v);return/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   var lin=[COLS.join(";")].concat(rs.map(function(r){var g=regDe(r);return COLS.map(function(k){var v=PCOL[k]?(r.pla?r.pla[PCOL[k]]:null):r[k];if(k==="n_medidas")v=r.pla&&r.pla.dists?r.pla.dists.length:null;if(typeof v==="number"&&k!=="lat"&&k!=="lng")v=br(v);
-    if(k==="registro")v=REG[g];if(k==="autor")v=r.autorNome||"";if(k==="detalhe")v=detalhe(r);if(k==="nivel_texto")v=g==="monitoramento"?NIV[r.nivel]:"";if(k==="data")v=fmtD(v);
+    if(k==="registro")v=REG[g];if(k==="autor")v=r.autorNome||"";if(k==="detalhe")v=detalhe(r);if(k==="nivel_texto")v=g==="monitoramento"?nivTxt(r):"";if(k==="data")v=fmtD(v);
     if((k==="lat"||k==="lng"||k==="contagem")&&v!=null)v=br(v);if(k==="tipo")v=g==="monitoramento"?TIPO[v]:"";if(k==="acao")v=v==="recomendado"?"Recomendado":v==="aplicado"?"Aplicado":"";return c(v)}).join(";")}));
   download("monitoramento_"+hoje()+".csv","﻿"+lin.join("\r\n"),"text/csv;charset=utf-8");toast(rs.length+" registros exportados")};
 $("eKml").onclick=function(){var rs=filtrados();if(!rs.length){toast("Nada para exportar no filtro");return}
   var kc=["ff90958a","ff2bc2e3","ff1f8aef","ff2f39d7"],st=kc.map(function(k,i){return'<Style id="n'+i+'"><IconStyle><color>'+k+'</color><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style>'}).join("")+
     '<Style id="est"><IconStyle><color>ff55ae4f</color><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style><Style id="pla"><IconStyle><color>ff2f6b9b</color><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style><Style id="apl"><IconStyle><color>ffe17d2a</color><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style>';
   var x='<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Monitoramento '+hoje()+'</name>'+st+
-    rs.map(function(r){var g=regDe(r),nm=g==="plantio"?"Plantio "+txtPla(r.pla):g==="estadio"?"Estádio "+r.estadio:g==="aplicacao"?"Aplicação "+(r.produto||""):r.alvo+" - "+NIV[r.nivel];
+    rs.map(function(r){var g=regDe(r),nm=g==="plantio"?"Plantio "+txtPla(r.pla):g==="estadio"?"Estádio "+r.estadio:g==="aplicacao"?"Aplicação "+(r.produto||""):r.alvo+" - "+nivTxt(r);
       var ds=fmtD(r.data)+" | Talhão "+r.talhao+(r.cultura?" | "+r.cultura:"")+(r.contagem!=null?" | "+br(r.contagem)+" "+(r.unidade||""):"")+(r.itens&&r.itens.length?" | "+detalhe(r):"")+(r.produto?" | "+r.produto+" "+(r.dose||""):"")+(r.obs?" | "+r.obs:"");
       return'<Placemark><name>'+esc(nm)+'</name><styleUrl>#'+(g==="plantio"?"pla":g==="estadio"?"est":g==="aplicacao"?"apl":"n"+r.nivel)+'</styleUrl><description>'+esc(ds)+'</description><Point><coordinates>'+r.lng+','+r.lat+',0</coordinates></Point></Placemark>'}).join("")+'</Document></kml>';
   download("monitoramento_"+hoje()+".kml",x,"application/vnd.google-earth.kml+xml");toast(rs.length+" registros exportados")};
@@ -1780,8 +1788,9 @@ function renderPainel(){if(!$("v-painel"))return;
   function tend(t,a){var A=[],B=[];base.forEach(function(r){if(regDe(r)!=="monitoramento"||r.talhao!==t||r.alvo!==a)return;var d=new Date(r.data+"T12:00");if(d>=h7)A.push(r.nivel||0);else if(d>=h14)B.push(r.nivel||0)});
     if(!A.length||!B.length)return'<span class="muted">–</span>';var m=function(v){return v.reduce(function(x,y){return x+y},0)/v.length},df=m(A)-m(B);
     return Math.abs(df)<.25?"= estável":df>0?'<span style="color:#d7392f">▲</span> subiu':'<span style="color:#4fae55">▼</span> caiu'}
-  $("pPrag").innerHTML=tab([{t:"Talhão"},{t:"Alvo"},{t:"Pontos",n:1},{t:"Média",n:1},{t:"Pior"},{t:"% Alto",n:1},{t:"Tendência"}],
+  $("pPrag").innerHTML=tab([{t:"Talhão"},{t:"Alvo"},{t:"Pontos",n:1},{t:"Média",n:1},{t:"Pior"},{t:"% Alto / presença",n:1},{t:"Tendência"}],
     Object.keys(G).sort(function(a,b){return G[b].mx-G[a].mx||G[b].al/G[b].n-G[a].al/G[a].n||natCmp(G[a].t,G[b].t)}).map(function(k){var g=G[k];
+      if(ehPA(g.a))return[esc(g.t),esc(g.a)+' <span class="tag">presença</span>',g.n,"–",g.mx?stTag("#d7392f","Presente"):stTag("#8a9590","Ausente"),Math.round(g.s/g.n*100)+"% c/ presença",tend(g.t,g.a)];
       return[esc(g.t),esc(g.a)+' <span class="tag">'+(TIPO[g.tipo]||"")+'</span>',g.n,pf1(g.s/g.n),nivTag(g.mx),Math.round(g.al/g.n*100)+"%",tend(g.t,g.a)]}),"Nenhum monitoramento no período.");
   // aplicações
   var ua={};base.forEach(function(r){if(regDe(r)==="aplicacao"&&(!ua[r.talhao]||r.data>ua[r.talhao]))ua[r.talhao]=r.data});
