@@ -769,6 +769,10 @@ th{color:var(--mut);font-weight:500}
 #login .btn.full{margin-top:14px}
 #lErr{margin-top:10px;color:var(--a);font-size:14px}
 .sinc{font-size:14px;line-height:1.5}
+.ctx{display:flex;gap:8px;margin-bottom:10px}.ctx select{flex:1}
+.ptab td{vertical-align:middle}.ptab select{padding:5px 6px;font-size:14px;width:auto}.ptab input[type=checkbox]{width:18px;height:18px}
+.pbulk{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.pbulk select{width:auto}
+.lock{font-size:12px;color:var(--mut);margin-top:4px}
 .pad.wide{max-width:1280px}
 .pfil{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.pfil select{width:auto;flex:1 1 130px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
@@ -820,6 +824,7 @@ details summary{cursor:pointer;margin-top:12px}
 <main>
  <!-- lista de talhões -->
  <section id="v-talhoes" class="view on"><div class="pad">
+  <div class="ctx hide" id="ctxFaz"><select id="selFaz"></select></div>
   <div id="aqui"></div>
   <input id="tBusca" placeholder="Buscar talhão (ex: AZ-05)" style="margin-bottom:10px">
   <div id="tLista"></div>
@@ -869,7 +874,7 @@ details summary{cursor:pointer;margin-top:12px}
  <section id="v-ocor" class="view"><div class="pad">
   <div class="card">
    <div class="gps" id="gpsInfo2">Buscando sinal GPS…</div><div class="gpsAct" id="gpsAct2"></div>
-   <div class="row"><div><label>Cultura</label><select id="ocCult"><option>Soja</option><option>Milho</option><option value="Outra">Outra</option></select></div><div><label>Estádio</label><input id="ocEst" list="dlEst" placeholder="Ex: V4, R3"></div></div>
+   <div id="ocLock" class="lock hide"></div><div class="row"><div><label>Cultura</label><select id="ocCult"><option>Soja</option><option>Milho</option><option value="Outra">Outra</option></select></div><div><label>Estádio</label><input id="ocEst" list="dlEst" placeholder="Ex: V4, R3"></div></div>
   </div>
   <div class="indt">Ocorrências deste ponto</div>
   <div class="ocgrid" id="ocGrid"></div>
@@ -886,7 +891,7 @@ details summary{cursor:pointer;margin-top:12px}
    </div>
    <div class="card m-base">
     <div class="row"><div><label style="margin-top:0">Data</label><input type="date" id="data" required></div><div><label style="margin-top:0">Talhão</label><input id="talhao" list="dlTal" required></div></div>
-    <div class="row"><div><label>Cultura</label><select id="cultura"><option>Soja</option><option>Milho</option><option value="Outra">Outra</option></select></div><div><label>Estádio</label><input id="estadio" list="dlEst" placeholder="Ex: V4, R3"></div></div>
+    <div id="regLock" class="lock hide"></div><div class="row"><div><label>Cultura</label><select id="cultura"><option>Soja</option><option>Milho</option><option value="Outra">Outra</option></select></div><div><label>Estádio</label><input id="estadio" list="dlEst" placeholder="Ex: V4, R3"></div></div>
    </div>
 
    <div class="banner m-mon" id="ocBanner"></div>
@@ -944,6 +949,7 @@ details summary{cursor:pointer;margin-top:12px}
  <!-- painel do supervisor -->
  <section id="v-painel" class="view"><div class="pad wide">
   <div class="pfil">
+   <select id="pFaz"></select><select id="pSafra"></select>
    <select id="pPer"><option value="7">Últimos 7 dias</option><option value="15">Últimos 15 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="0">Tudo</option></select>
    <select id="pCult"><option value="">Todas culturas</option><option>Soja</option><option>Milho</option></select>
    <select id="pTal"><option value="">Todos talhões</option></select>
@@ -951,6 +957,7 @@ details summary{cursor:pointer;margin-top:12px}
    <select id="pCob"><option value="5">Monitorar a cada 5 dias</option><option value="7" selected>Monitorar a cada 7 dias</option><option value="10">Monitorar a cada 10 dias</option><option value="14">Monitorar a cada 14 dias</option></select>
   </div>
   <div class="muted" id="pInfo" style="margin:-2px 0 10px"></div>
+  <button type="button" class="btn full" id="pPlano" style="margin-bottom:10px">Fazendas, safra e cultura dos talhões</button>
   <div class="kpis" id="pKpi"></div>
   <div class="pgrid">
    <div class="card"><h3>Equipe</h3><div class="tw" id="pEquipe"></div></div>
@@ -965,8 +972,35 @@ details summary{cursor:pointer;margin-top:12px}
   <button type="button" class="btn p full" id="pAtual" style="margin-top:12px">Atualizar dados da equipe</button>
  </div><div id="pTip"></div></section>
 
+ <!-- plano: fazenda, safra e culturas (supervisor) -->
+ <section id="v-plano" class="view"><div class="pad wide">
+  <div class="card">
+   <div style="font-weight:600">Fazenda</div>
+   <div class="row" style="margin-top:8px"><select id="plFaz"></select><button type="button" class="btn" id="plFazNova" style="flex:0 0 auto">+ Nova fazenda</button></div>
+   <div id="plFazBox" class="hide" style="margin-top:8px"><label>Nome da fazenda</label><input id="plFazNome" placeholder="Ex: Fazenda Boa Vista">
+    <label>Limites dos talhões (KML ou GeoJSON)</label><input type="file" id="plFazKml" accept=".kml,.geojson,.json">
+    <button type="button" class="btn p full" id="plFazSalvar" style="margin-top:8px">Criar fazenda</button></div>
+   <button type="button" class="btn" id="plFazTal" style="margin-top:8px">Trocar limites dos talhões desta fazenda</button><input type="file" id="plFazTalF" accept=".kml,.geojson,.json" style="display:none">
+  </div>
+  <div class="card">
+   <div style="font-weight:600">Safra atual</div>
+   <p class="muted" style="margin:4px 0 8px">Todo lançamento novo entra na safra atual. Ao trocar, o app começa limpo na safra nova; as anteriores ficam no filtro de safra do painel.</p>
+   <div class="row"><select id="plSafra"></select><button type="button" class="btn p" id="plSafraAtual" style="flex:0 0 auto">Tornar atual</button></div>
+   <div class="row" style="margin-top:8px"><input id="plSafraNome" placeholder="Nova safra (ex: Safra 2026/27, Safrinha 2027)"><button type="button" class="btn" id="plSafraNova" style="flex:0 0 auto">Criar</button></div>
+   <div class="muted" id="plSafraInfo" style="margin-top:6px"></div>
+  </div>
+  <div class="card">
+   <div style="font-weight:600">Cultura de cada talhão · <span id="plSafraNm"></span></div>
+   <div class="pbulk"><button type="button" class="btn" id="plTodos">Marcar todos</button><select id="plBulkC"><option value="Soja">Soja</option><option value="Milho">Milho</option><option value="Pousio">Sem cultura (pousio)</option><option value="">Não definido</option></select><button type="button" class="btn" id="plBulk">Aplicar aos marcados</button></div>
+   <div class="tw sc" id="plTab" style="max-height:480px"></div>
+   <button type="button" class="btn p full" id="plSalvar" style="margin-top:10px">Salvar culturas</button>
+   <div class="muted" id="plMsg" style="margin-top:6px"></div>
+  </div>
+ </div></section>
+
  <!-- dados -->
  <section id="v-mais" class="view"><div class="pad">
+  <div class="card hide" id="cPlano"><div style="font-weight:600">Fazendas, safra e culturas</div><p class="muted" style="margin:4px 0 8px">Defina a safra atual e a cultura de cada talhão. Os técnicos lançam com a cultura travada pelo talhão.</p><button type="button" class="btn p full" id="dPlano">Abrir</button></div>
   <div class="card" id="cSync">
    <div style="font-weight:600">Usuário e sincronização</div>
    <div class="sinc" id="sStat"></div>
@@ -1153,18 +1187,19 @@ function header(){var b=$("hBack"),t=$("hTitle"),s=$("hSub");
   if(VIEW==="mapa"&&S.talSel){b.style.display="block";s.textContent=FAZENDA;t.textContent="/ "+S.talSel}
   else if(VIEW==="ocor"){b.style.display="block";s.textContent=FAZENDA+" / "+($("talhao").value||"sem talhão");t.textContent="Monitorar ponto"}
   else if(VIEW==="reg"){b.style.display="block";s.textContent=FAZENDA+" / "+($("talhao").value||"sem talhão");t.textContent=($("rid").value?"Editar · ":"")+(S.modo==="monitoramento"?nomeOc():REG[S.modo])}
-  else{b.style.display="none";s.textContent=FAZENDA;t.textContent={talhoes:"Talhões",mapa:"Mapa geral",hist:"Histórico",mais:"Dados",painel:"Painel"}[VIEW]||""}}
+  else if(VIEW==="plano"){b.style.display="block";s.textContent="Supervisor";t.textContent="Safra e culturas"}
+  else{b.style.display="none";s.textContent=FAZENDA+(safraAtual()?" · "+safraAtual():"");t.textContent={talhoes:"Talhões",mapa:"Mapa geral",hist:"Histórico",mais:"Dados",painel:"Painel",plano:"Safra e culturas"}[VIEW]||""}}
 function go(v){VIEW=v;var navv=v==="ocor"?"talhoes":v==="reg"?(S.talSel?"talhoes":"hist"):v==="mapa"&&S.talSel?"talhoes":v;
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.v===navv)});
   document.querySelectorAll(".view").forEach(function(s){s.classList.toggle("on",s.id==="v-"+v)});
   $("mapwrap").classList.toggle("talmode",!!S.talSel);
   document.querySelector("#v-mapa .bar").classList.toggle("hide",!!S.talSel);
   if(v==="mapa"&&map){setTimeout(function(){map.invalidateSize()},50);renderMap();drawTalStyle();updDist()}
-  if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();if(v==="mais"){offInfo();var nt=tilesFazenda().length;if(nt)$("offN").textContent=nt.toLocaleString("pt-BR")}
+  if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();if(v==="plano")renderPlano();if(v==="mais"){offInfo();var nt=tilesFazenda().length;if(nt)$("offN").textContent=nt.toLocaleString("pt-BR")}
   $("main").scrollTop=0;header()}
 document.querySelector("main").id="main";
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){if(b.dataset.v==="mapa"||b.dataset.v==="talhoes")S.talSel=null;go(b.dataset.v);if(b.dataset.v==="mapa")fitAll()}});
-$("hBack").onclick=function(){if(S.picking){var v=S.picking;S.picking=null;$("dist").style.background="";$("dist").style.color="";go(v);posForm();return}if(VIEW==="ocor"){fimPonto()}else if(VIEW==="reg"){go(VOLTA||"talhoes")}else if(VIEW==="mapa"&&S.talSel){S.talSel=null;go("talhoes")}};
+$("hBack").onclick=function(){if(S.picking){var v=S.picking;S.picking=null;$("dist").style.background="";$("dist").style.color="";go(v);posForm();return}if(VIEW==="ocor"){fimPonto()}else if(VIEW==="reg"){go(VOLTA||"talhoes")}else if(VIEW==="mapa"&&S.talSel){S.talSel=null;go("talhoes")}else if(VIEW==="plano"){go(VOLTA_PL||"mais")}};
 function abrirTalhao(n){S.talSel=n;go("mapa");fitTal()}
 
 function seg(id,key,cb){$(id).querySelectorAll("button").forEach(function(b){b.onclick=function(){setSeg(id,b.dataset.v);S[key]=key==="nivel"?+b.dataset.v:b.dataset.v;cb&&cb()}})}
@@ -1173,7 +1208,7 @@ seg("tipo","tipo",fillAlvos);seg("nivel","nivel");seg("acao","acao",function(){$
 
 /* ---------- lista de talhões ---------- */
 function renderTalhoes(){var m=infoTalhoes(),q=$("tBusca").value.trim().toLowerCase(),lim7=new Date();lim7.setDate(lim7.getDate()-7);
-  Object.keys(m).forEach(function(k){m[k].ult="";m[k].pior=-1;m[k].n=0;m[k].cult=""});
+  Object.keys(m).forEach(function(k){m[k].ult="";m[k].pior=-1;m[k].n=0;m[k].cult=""});fazSel();
   S.all.slice().sort(function(a,b){return natCmp(a.data+a.criado,b.data+b.criado)}).forEach(function(r){var x=m[r.talhao];if(!x)return;x.n++;if(r.data>x.ult)x.ult=r.data;if(r.cultura)x.cult=r.cultura;
     if(regDe(r)==="monitoramento"&&new Date(r.data+"T12:00")>=lim7)x.pior=Math.max(x.pior,r.nivel)});
   var ks=Object.keys(m).filter(function(k){return!q||k.toLowerCase().indexOf(q)>=0}).sort(natCmp);
@@ -1181,7 +1216,7 @@ function renderTalhoes(){var m=infoTalhoes(),q=$("tBusca").value.trim().toLowerC
   $("aqui").innerHTML=aqui?'<div class="card tal aqui" data-tal="'+esc(aqui)+'"><div class="i">Você está no talhão</div><div class="n">'+esc(aqui)+'</div><div class="go">›</div></div>':
     '<p class="muted" style="margin:0 0 10px">'+(S.fix?"Seu GPS está fora dos talhões cadastrados.":"Buscando GPS para achar o talhão onde você está…")+'</p>';
   $("tLista").innerHTML=ks.map(function(k){var x=m[k];return'<div class="card tal" data-tal="'+esc(k)+'"><div class="n">'+esc(k)+'</div><div class="i">'+
-    (x.ha?br(x.ha.toFixed(1))+" ha":"sem limite")+(x.cult?" · "+esc(x.cult):"")+'<br>'+(x.ult?"Último registro "+fmtD(x.ult):"Sem registros")+
+    (x.ha?br(x.ha.toFixed(1))+" ha":"sem limite")+(culturaPlano(k)?' · <b>'+esc(culturaPlano(k)==="Pousio"?"Pousio":culturaPlano(k))+'</b>':x.cult?" · "+esc(x.cult):"")+'<br>'+(x.ult?"Último registro "+fmtD(x.ult):"Sem registros")+
     (x.pior>=0?' · <span class="dot" style="background:'+COR[x.pior]+'"></span>'+NIV[x.pior]+" (7 dias)":"")+'</div><div class="go">›</div></div>'}).join("")||'<p class="muted">Nenhum talhão encontrado.</p>'}
 $("tBusca").oninput=renderTalhoes;
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-tal]");if(t){abrirTalhao(t.dataset.tal);return}
@@ -1358,7 +1393,7 @@ function posForm0(){var info=$("gpsInfo");info.classList.remove("warn");
   if(!S.fix){info.textContent=(S.gpsErr||"Buscando sinal GPS…")+(TESTE?" · MODO TESTE: pode salvar, o ponto vai para dentro do talhão":"");$("lat").value="";$("lng").value="";return}
   $("lat").value=S.fix.lat.toFixed(6);$("lng").value=S.fix.lng.toFixed(6);S.acc=S.fix.acc;
   var t=talhaoDe(S.fix.lat,S.fix.lng),sel=$("talhao").value.trim(),txt="📍 GPS ±"+Math.round(S.fix.acc)+" m · ";
-  if(!sel&&t){$("talhao").value=t;sel=t;header()}
+  if(!sel&&t){$("talhao").value=t;sel=t;header();travaCult()}
   if(t&&t===sel)txt+="dentro do "+t;else if(t){txt+="atenção: o GPS indica o talhão "+t+", não o "+sel;info.classList.add("warn")}else{txt+="fora dos talhões cadastrados";info.classList.add("warn")}
   if(S.fix.acc>30){txt+=" · precisão baixa, aguarde";info.classList.add("warn")}
   if(TESTE&&info.classList.contains("warn"))txt+=" · MODO TESTE: o ponto vai para dentro do talhão";
@@ -1392,7 +1427,7 @@ function novo(m,manter){var keep=manter?{c:$("cultura").value,e:$("estadio").val
   var up=S.all.filter(function(x){return x.talhao===t&&x.pla}).sort(function(a,b){return natCmp(b.criado,a.criado)})[0];
   S.pd=[];S.pModo=up?up.pla.modo:"dist";setSeg("pModo",S.pModo);$("pAlvo").value=up&&up.pla.alvoHa?up.pla.alvoHa:"";$("pEsp").value=up&&up.pla.esp?br(up.pla.esp):(ESP_PADRAO[$("cultura").value]||"");
   if(keep&&m==="plantio"){$("pAlvo").value=keep.pa;$("pEsp").value=keep.pe;S.pModo=keep.pm;setSeg("pModo",S.pModo)}
-  setModo(m);fillAlvos();renderGrupo();renderPla();posForm()}
+  setModo(m);travaCult();fillAlvos();renderGrupo();renderPla();posForm()}
 document.querySelectorAll("#acoes button").forEach(function(b){b.onclick=function(){VOLTA="mapa";S.manual=null;if(b.dataset.m==="monitoramento"){novoPonto();return}novo(b.dataset.m);go("reg")}});
 /* ---------- monitoramento por ponto e ocorrência ---------- */
 function ehPA(a){return!!(OC[a]&&OC[a].pa)}
@@ -1400,7 +1435,7 @@ function nivTxt(r){return r.presenca!=null?(r.presenca?"Presente":"Ausente"):NIV
 function aplicaPA(){var pa=ehPA(S.oc);$("presBox").classList.toggle("hide",!pa);$("nivBox").classList.toggle("hide",pa);$("indBox").classList.toggle("hide",pa||S.modo!=="monitoramento");if(pa)setSeg("pres",S.pres==null?"":S.pres?1:0)}
 $("pres").querySelectorAll("button").forEach(function(b){b.onclick=function(){S.pres=b.dataset.v==="1";setSeg("pres",b.dataset.v)}});
 function nomeOc(){var o=OC[S.oc];return o&&o.gen?($("alvo").value.trim()||S.oc):(S.oc||"Monitoramento")}
-function novoPonto(){S.oc=null;novo("monitoramento");S.ponto={id:uid(),feitos:[]};$("ocCult").value=$("cultura").value;$("ocEst").value=$("estadio").value;renderOcGrid();go("ocor");posForm()}
+function novoPonto(){S.oc=null;novo("monitoramento");S.ponto={id:uid(),feitos:[]};$("ocCult").value=$("cultura").value;travaCult();$("ocEst").value=$("estadio").value;renderOcGrid();go("ocor");posForm()}
 function renderOcGrid(){var c=$("ocCult").value,f=(S.ponto&&S.ponto.feitos)||[];
   $("ocGrid").innerHTML=Object.keys(OC).filter(function(k){return!OC[k].milho||c!=="Soja"}).map(function(k){var o=OC[k],n=f.filter(function(x){return x===k}).length;
     return'<button type="button" class="oc" data-oc="'+esc(k)+'" style="background:'+o.cor+'">'+esc(k)+(n?'<span class="ok">'+(n>1?n:"✓")+'</span>':"")+SV[o.ic]+'</button>'}).join("");
@@ -1425,7 +1460,7 @@ function renderInd(itens){var l=indicadores(S.oc),q={};(itens||[]).forEach(funct
     inp.oninput=upd;c.querySelectorAll("button").forEach(function(b){b.onclick=function(){var v=num(inp.value);v=v==null?0:v;v=Math.max(0,Math.round((v+(+b.dataset.d))*100)/100);if(inp.value.trim()===""&&b.dataset.d==="-1")v=0;inp.value=br(v);upd()}})})}
 function lerInd(){var out=[];document.querySelectorAll("#indList .ind").forEach(function(c){var n=num(c.querySelector("input").value);if(n!=null)out.push({alvo:c.dataset.n,qtd:n,un:c.dataset.u})});return out}
 $("cultura").onchange=function(){var it=lerInd();fillAlvos();if(S.modo==="monitoramento"){renderInd(it);renderBanner();renderChips()}};
-$("talhao").onchange=function(){posForm();header()};
+$("talhao").onchange=function(){posForm();header();travaCult()};
 $("alvo").onchange=$("alvo").oninput=function(){if(S.modo==="monitoramento"){renderBanner();renderChips()}};
 var outro=false;$("bOutro").onclick=function(){outro=true;$("bSalvar").click()};
 $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
@@ -1450,6 +1485,7 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
     criado:old?old.criado:new Date().toISOString(),alterado:new Date().toISOString()};
   if(teste||(old&&old.teste))r.teste=true;
   if(manual||(old&&old.posManual))r.posManual=true;
+  r.fazenda=old?(old.fazenda||FAZ_PADRAO):S.fazId;r.safra=old?(old.safra||safraDe(old)||null):(safraAtual()||null);
   if(old&&old.autorNome){r.autor=old.autor;r.autorNome=old.autorNome;r.autorEmail=old.autorEmail;if(U&&U.nome!==old.autorNome)r.editadoPor=U.nome;else if(old.editadoPor)r.editadoPor=old.editadoPor}
   else if(U){r.autor=U.id;r.autorNome=U.nome;r.autorEmail=U.email||null}
   if(m==="monitoramento"){var o=OC[S.oc]||{};r.tipo=o.tipo||S.tipo;r.alvo=$("alvo").value.trim();r.nivel=S.nivel;r.itens=lerInd();r.ponto=old?old.ponto:(S.ponto?S.ponto.id:null);
@@ -1554,7 +1590,7 @@ $("hBusca").oninput=renderHist;$("hPer").onchange=renderHist;$("hTal").onchange=
 
 /* ---------- carga ---------- */
 function fillSel(id,vals,first){var s=$(id),cur=s.value;s.innerHTML='<option value="">'+first+'</option>'+vals.map(function(v){return'<option>'+esc(v)+'</option>'}).join("");if(vals.indexOf(cur)>=0)s.value=cur}
-function load(){return getAll().then(function(a){a=a||[];S.pend=a.filter(function(r){return r.pend}).length;S.all=a.filter(function(r){return!r.apagado});
+function load(){return getAll().then(function(a){a=a||[];S.pend=a.filter(function(r){return r.pend}).length;S.todos=a.filter(function(r){return!r.apagado});S.all=S.todos.filter(noCtx);
   var tal=uniq(S.all.map(function(r){return r.talhao}).concat(S.tal?S.tal.features.map(nomeTal):[]));
   fillSel("fTal",tal,"Todos talhões");fillSel("hTal",tal,"Todos");fillSel("fAlvo",uniq(S.all.map(function(r){return r.alvo})),"Todos alvos");
   var aut=uniq(S.all.map(function(r){return r.autorNome||"(sem nome)"}));fillSel("fAut",aut,"Todos técnicos");fillSel("hAut",aut,"Todos");
@@ -1594,7 +1630,7 @@ function kmlToGeo(txt){var d=new DOMParser().parseFromString(txt,"text/xml"),fs=
       rings.push(c.textContent.trim().split(/\s+/).map(function(s){var a=s.split(",");return[+a[0],+a[1]]}))});
       if(rings.length)fs.push({type:"Feature",properties:{name:nm},geometry:{type:"Polygon",coordinates:rings}})})});
   return{type:"FeatureCollection",features:fs}}
-function drawTal(){return cfgGet("talhoes").then(function(g){g=g||FAZ;S.tal=g;if(!map)return;if(talLayer){map.removeLayer(talLayer);talLayer=null}if(!g)return;
+function drawTal(){return talhoesFaz().then(function(g){S.tal=g;if(!map)return;if(talLayer){map.removeLayer(talLayer);talLayer=null}if(!g)return;
   talLayer=L.geoJSON(g,{style:{color:"#ffe14d",weight:2,fillOpacity:.04},interactive:true,onEachFeature:function(f,l){var n=nomeTal(f);if(!n)return;l.bindTooltip(n,{permanent:true,direction:"center",className:"tl"});
     l.on("click",function(e){if(S.picking){L.DomEvent.stop(e);pickAt(e.latlng);return}if(S.talSel===n)return;toast("Talhão "+n);abrirTalhao(n)})}}).addTo(map);
   talLayer.bringToBack();drawTalStyle()})}
@@ -1672,7 +1708,7 @@ function sincronizar(auto){if(sincRodando)return Promise.resolve();
   if(!U||U.local||!U.rt){if(!auto)mostraLogin();return Promise.resolve()}
   if(auto&&navigator.onLine===false)return Promise.resolve();
   sincRodando=true;sincErro=null;statusSync();var env=0,rec=0;
-  return renova().then(function(){return getAll()}).then(function(a){
+  return renova().then(function(){return puxaCfg()}).then(function(){return getAll()}).then(function(a){
     var pend=a.filter(function(r){return r.pend}),lotes=[];for(var i=0;i<pend.length;i+=15)lotes.push(pend.slice(i,i+15));
     var p=Promise.resolve();
     lotes.forEach(function(l){p=p.then(function(){
@@ -1704,7 +1740,7 @@ function statusSync(){var el=$("sStat");if(!el)return;var cloud=nuvemOk(),h="";
   else{h+=(sincRodando?"🔄 Enviando…":S.pend?"⬆️ "+S.pend+" registro(s) aguardando envio":"✅ Tudo enviado")+"<br>🕒 Último envio: "+quando(lsGet("ml_ultSinc"))+(U.sup?"<br>👥 Supervisor: este aparelho também recebe os lançamentos da equipe":"");
     if(sincErro&&!sincRodando)h+='<br><span style="color:var(--a)">⚠️ '+esc(sincErro)+"</span>"}
   el.innerHTML=h;$("sBtn").classList.toggle("hide",!cloud);
-  var pv=!!(U&&U.sup&&cloud);document.querySelector('nav button[data-v="painel"]').classList.toggle("hide",!pv);if(!pv&&VIEW==="painel")go("talhoes");$("supBox").classList.toggle("hide",!(U&&U.sup&&cloud));$("sBtn").textContent="Sincronizar";$("sBtn").disabled=sincRodando;
+  var pv=!!(U&&U.sup&&cloud);document.querySelector('nav button[data-v="painel"]').classList.toggle("hide",!pv);if(!pv&&VIEW==="painel")go("talhoes");$("supBox").classList.toggle("hide",!(U&&U.sup&&cloud));$("cPlano").classList.toggle("hide",!(U&&U.sup&&cloud));$("sBtn").textContent="Sincronizar";$("sBtn").disabled=sincRodando;
   $("sCfg").classList.toggle("hide",!!(SUPA_URL&&SUPA_KEY));var n=nuvem();if(document.activeElement!==$("cfUrl"))$("cfUrl").value=n.url;if(document.activeElement!==$("cfKey"))$("cfKey").value=n.key}
 $("sBtn").onclick=function(){sincronizar(false)};
 function listaSup(){var box=$("supLista");box.innerHTML='<p class="muted">Carregando…</p>';
@@ -1727,6 +1763,89 @@ window.addEventListener("online",function(){agendaSync(1000)});
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")agendaSync(1500)});
 setInterval(function(){if(document.visibilityState==="visible")agendaSync(0)},5*60000);
 
+/* ---------- fazendas, safras e plano de culturas ---------- */
+var FAZ_PADRAO="lindos-campos",VOLTA_PL=null;
+var CFG=(function(){try{return JSON.parse(lsGet("ml_cfg")||"null")}catch(e){return null}})()||{faz:[],safras:{},plano:{}};
+function fazendas(){return CFG.faz&&CFG.faz.length?CFG.faz:[{id:FAZ_PADRAO,nome:"Fazenda Lindos Campos"}]}
+S.fazId=lsGet("ml_faz")||FAZ_PADRAO;if(!fazendas().some(function(f){return f.id===S.fazId}))S.fazId=fazendas()[0].id;
+function fazAt(){return fazendas().filter(function(f){return f.id===S.fazId})[0]||fazendas()[0]}
+FAZENDA=fazAt().nome;
+function safraAtual(){return fazAt().safra_atual||""}
+function safrasFaz(){return(CFG.safras[S.fazId]||[]).slice()}
+S.safraVer=lsGet("ml_safraVer_"+S.fazId)||"";
+function safraVista(){return S.safraVer&&U&&U.sup?S.safraVer:safraAtual()}
+function safraDe(r){return r.safra||(fazendas().filter(function(f){return f.id===(r.fazenda||FAZ_PADRAO)})[0]||{}).safra_inicial||""}
+function noCtx(r){if((r.fazenda||FAZ_PADRAO)!==S.fazId)return false;var v=safraVista();if(!v)return true;var d=safraDe(r);return!d||d===v}
+function culturaPlano(t,sf){var p=CFG.plano[S.fazId]||{},q=p[sf||safraAtual()]||{};return q[t]||""}
+function talhoesFaz(){var f=fazAt();return cfgGet("tal_"+f.id).then(function(g){if(g&&g.alterado===f.alterado&&g.geo)return g.geo;
+  if(f.id===FAZ_PADRAO&&!f.tem_tal)return cfgGet("talhoes").then(function(x){return x||FAZ});return g&&g.geo?g.geo:(f.id===FAZ_PADRAO?FAZ:null)})}
+function guardaCfg(){lsSet("ml_cfg",JSON.stringify(CFG))}
+function mudaFaz(id){if(id===S.fazId)return;S.fazId=id;lsSet("ml_faz",id);FAZENDA=fazAt().nome;S.safraVer=lsGet("ml_safraVer_"+id)||"";S.talSel=null;
+  drawTal().then(load).then(function(){fitAll();header();toast(FAZENDA)})}
+function fazSel(){var fs=fazendas(),box=$("ctxFaz");box.classList.toggle("hide",fs.length<2);
+  $("selFaz").innerHTML=fs.map(function(f){return'<option value="'+esc(f.id)+'"'+(f.id===S.fazId?" selected":"")+'>'+esc(f.nome)+'</option>'}).join("")}
+$("selFaz").onchange=function(){mudaFaz(this.value)};
+function fillCtxSel(fid,sid){var fs=fazendas();$(fid).innerHTML=fs.map(function(f){return'<option value="'+esc(f.id)+'"'+(f.id===S.fazId?" selected":"")+'>'+esc(f.nome)+'</option>'}).join("");$(fid).classList.toggle("hide",fs.length<2);
+  var ss=safrasFaz(),at=safraAtual(),v=safraVista();$(sid).innerHTML=ss.length?ss.map(function(x){return'<option value="'+esc(x)+'"'+(x===v?" selected":"")+'>'+esc(x)+(x===at?" (atual)":"")+'</option>'}).join(""):'<option value="">Safra não definida</option>';$(sid).disabled=!ss.length}
+$("pFaz").onchange=function(){mudaFaz(this.value)};
+$("pSafra").onchange=function(){S.safraVer=this.value===safraAtual()?"":this.value;lsSet("ml_safraVer_"+S.fazId,S.safraVer);load().then(function(){header();toast("Mostrando "+(S.safraVer||safraAtual()))})};
+/* trava a cultura do lançamento conforme o plano da safra */
+function travaCult(){var t=$("talhao").value.trim(),c=t?culturaPlano(t):"",trava=c==="Soja"||c==="Milho";
+  ["cultura","ocCult"].forEach(function(id){var el=$(id);if(trava&&!$("rid").value)el.value=c;el.disabled=trava&&!$("rid").value});
+  var msg=!t||!c?"":trava?"🔒 Cultura definida pelo supervisor para "+t+" na "+safraAtual()+": "+c:"⚠️ "+t+" está como sem cultura (pousio) na "+safraAtual()+". Confira antes de lançar.";
+  ["ocLock","regLock"].forEach(function(id){$(id).textContent=msg;$(id).classList.toggle("hide",!msg||!!$("rid").value)});
+  if(trava){fillAlvos();if(VIEW==="ocor")renderOcGrid()}}
+/* busca configuração na nuvem (todos os usuários) */
+function puxaCfg(){if(!nuvemOk()||!U||U.local||!U.at)return Promise.resolve();
+  return Promise.all([api("/rest/v1/fazendas?select=id,nome,safra_atual,safra_inicial,alterado,tem_tal&order=nome"),api("/rest/v1/safras?select=fazenda,nome,criado&order=criado"),api("/rest/v1/plano?select=fazenda,safra,talhao,cultura")])
+   .then(function(r){var fs=r[0]||[],sf={},pl={};(r[1]||[]).forEach(function(x){(sf[x.fazenda]=sf[x.fazenda]||[]).push(x.nome)});
+     (r[2]||[]).forEach(function(x){var a=pl[x.fazenda]=pl[x.fazenda]||{},b=a[x.safra]=a[x.safra]||{};b[x.talhao]=x.cultura});
+     var antes=JSON.stringify(CFG);CFG={faz:fs,safras:sf,plano:pl};guardaCfg();
+     if(!fs.some(function(f){return f.id===S.fazId})&&fs.length){S.fazId=fs[0].id;lsSet("ml_faz",S.fazId)}FAZENDA=fazAt().nome;
+     var w=Promise.resolve();fs.forEach(function(f){if(!f.tem_tal)return;w=w.then(function(){return cfgGet("tal_"+f.id)}).then(function(g){if(g&&g.alterado===f.alterado)return;
+       return api("/rest/v1/fazendas?select=talhoes&id=eq."+encodeURIComponent(f.id),{tempo:90000}).then(function(x){if(x&&x[0]&&x[0].talhoes)return cfgSet("tal_"+f.id,{alterado:f.alterado,geo:x[0].talhoes})})})});
+     return w.then(function(){if(antes!==JSON.stringify(CFG)){header();return drawTal()}})})
+   .catch(function(e){if(e.status!==404&&!/does not exist|schema cache/i.test(e.message))throw e})}
+/* tela do supervisor */
+var PL={};
+$("dPlano").onclick=function(){VOLTA_PL="mais";go("plano")};$("pPlano").onclick=function(){VOLTA_PL="painel";go("plano")};
+function renderPlano(){var fs=fazendas();$("plFaz").innerHTML=fs.map(function(f){return'<option value="'+esc(f.id)+'"'+(f.id===S.fazId?" selected":"")+'>'+esc(f.nome)+'</option>'}).join("");
+  var ss=safrasFaz(),at=safraAtual();$("plSafra").innerHTML=ss.length?ss.map(function(x){return'<option'+(x===at?" selected":"")+'>'+esc(x)+'</option>'}).join(""):'<option value="">Nenhuma safra criada</option>';
+  $("plSafraInfo").textContent=at?"Safra atual: "+at:"Crie a primeira safra para começar.";$("plSafraNm").textContent=at||"(crie uma safra)";
+  var nomes=uniq((S.tal?S.tal.features.map(nomeTal):[])),info=infoTalhoes();PL={};nomes.forEach(function(t){PL[t]=culturaPlano(t)});
+  $("plTab").innerHTML=nomes.length?'<table class="ptab"><tr><th></th><th>Talhão</th><th style="text-align:right">Área</th><th>Cultura</th></tr>'+nomes.map(function(t){
+    return'<tr><td><input type="checkbox" data-t="'+esc(t)+'"></td><td>'+esc(t)+'</td><td class="n">'+(info[t]&&info[t].ha?br(info[t].ha.toFixed(1))+" ha":"")+'</td><td><select data-c="'+esc(t)+'">'+
+      [["","Não definido"],["Soja","Soja"],["Milho","Milho"],["Pousio","Sem cultura (pousio)"]].map(function(o){return'<option value="'+o[0]+'"'+(PL[t]===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></td></tr>'}).join("")+'</table>':'<p class="muted">Esta fazenda não tem limites de talhões. Importe o KML acima.</p>';
+  $("plTab").querySelectorAll("select[data-c]").forEach(function(sl){sl.onchange=function(){PL[sl.dataset.c]=sl.value}});
+  var dis=!at;["plSalvar","plBulk","plTodos"].forEach(function(id){$(id).disabled=dis});$("plMsg").textContent=""}
+$("plFaz").onchange=function(){mudaFaz(this.value);setTimeout(renderPlano,300)};
+$("plFazNova").onclick=function(){$("plFazBox").classList.toggle("hide")};
+function lerGeo(f){return f.text().then(function(t){var g=/^\s*</.test(t)?kmlToGeo(t):JSON.parse(t);if(!g||!g.features||!g.features.length)throw new Error("nenhum polígono encontrado no arquivo");return g})}
+function slug(n){return n.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||uid()}
+function gravaFaz(id,body){return renova().then(function(){return api("/rest/v1/fazendas?on_conflict=id",{m:"POST",b:Object.assign({id:id,alterado:new Date().toISOString()},body),h:{Prefer:"resolution=merge-duplicates,return=minimal"},tempo:120000})})}
+$("plFazSalvar").onclick=function(){var nm=$("plFazNome").value.trim(),f=$("plFazKml").files[0],b=this;if(nm.length<3){toast("Digite o nome da fazenda");return}if(!f){toast("Escolha o arquivo KML dos talhões");return}
+  b.disabled=true;var id=slug(nm);lerGeo(f).then(function(g){return gravaFaz(id,{nome:nm,talhoes:g,tem_tal:true})}).then(puxaCfg).then(function(){$("plFazBox").classList.add("hide");$("plFazNome").value="";$("plFazKml").value="";mudaFaz(id);setTimeout(renderPlano,400);toast("Fazenda criada")})
+   .catch(function(e){toast("Erro: "+e.message)}).then(function(){b.disabled=false})};
+$("plFazTal").onclick=function(){$("plFazTalF").click()};
+$("plFazTalF").onchange=function(){var f=this.files[0];if(!f)return;var fz=fazAt();lerGeo(f).then(function(g){return gravaFaz(fz.id,{nome:fz.nome,talhoes:g,tem_tal:true})}).then(puxaCfg).then(drawTal).then(load).then(function(){renderPlano();toast("Limites atualizados")}).catch(function(e){toast("Erro: "+e.message)});this.value=""};
+$("plSafraNova").onclick=function(){var nm=$("plSafraNome").value.trim().replace(/\s+/g," "),fz=fazAt();if(nm.length<4){toast("Digite o nome da safra");return}
+  if(safrasFaz().indexOf(nm)>=0){toast("Essa safra já existe");return}
+  renova().then(function(){return api("/rest/v1/safras",{m:"POST",b:{fazenda:fz.id,nome:nm},h:{Prefer:"return=minimal"}})})
+   .then(function(){return gravaFaz(fz.id,{nome:fz.nome,safra_atual:nm,safra_inicial:fz.safra_inicial||nm})}).then(puxaCfg).then(load)
+   .then(function(){$("plSafraNome").value="";renderPlano();toast(nm+" é a safra atual")}).catch(function(e){toast("Erro: "+e.message)})};
+$("plSafraAtual").onclick=function(){var nm=$("plSafra").value,fz=fazAt();if(!nm||nm===safraAtual())return;
+  gravaFaz(fz.id,{nome:fz.nome,safra_atual:nm}).then(puxaCfg).then(load).then(function(){renderPlano();toast(nm+" é a safra atual")}).catch(function(e){toast("Erro: "+e.message)})};
+$("plTodos").onclick=function(){var cs=$("plTab").querySelectorAll("input[type=checkbox]"),todos=Array.prototype.every.call(cs,function(c){return c.checked});cs.forEach(function(c){c.checked=!todos})};
+$("plBulk").onclick=function(){var v=$("plBulkC").value,n=0;$("plTab").querySelectorAll("input[type=checkbox]:checked").forEach(function(c){var t=c.dataset.t;PL[t]=v;var sl=$("plTab").querySelector('select[data-c="'+t.replace(/"/g,'\\"')+'"]');if(sl)sl.value=v;n++});toast(n?n+" talhões alterados (falta salvar)":"Marque os talhões primeiro")};
+$("plSalvar").onclick=function(){var fz=fazAt(),sf=safraAtual(),b=this;if(!sf)return;
+  var rows=Object.keys(PL).filter(function(t){return PL[t]}).map(function(t){return{fazenda:fz.id,safra:sf,talhao:t,cultura:PL[t]}}),
+      limpar=Object.keys(PL).filter(function(t){return!PL[t]&&culturaPlano(t)});
+  b.disabled=true;$("plMsg").textContent="Salvando…";
+  renova().then(function(){return rows.length?api("/rest/v1/plano?on_conflict=fazenda,safra,talhao",{m:"POST",b:rows,h:{Prefer:"resolution=merge-duplicates,return=minimal"}}):null})
+   .then(function(){var w=Promise.resolve();limpar.forEach(function(t){w=w.then(function(){return api("/rest/v1/plano?fazenda=eq."+encodeURIComponent(fz.id)+"&safra=eq."+encodeURIComponent(sf)+"&talhao=eq."+encodeURIComponent(t),{m:"DELETE"})})});return w})
+   .then(puxaCfg).then(function(){renderPlano();renderTalhoes();$("plMsg").textContent="✅ Salvo. Os técnicos recebem na próxima sincronização.";toast("Culturas salvas")})
+   .catch(function(e){$("plMsg").textContent="";toast("Erro: "+e.message)}).then(function(){b.disabled=false})};
+
 /* ---------- painel do supervisor ---------- */
 var DIA=864e5;
 function diasDesde(d){if(!d)return null;var a=new Date(d+"T12:00"),b=new Date(hoje()+"T12:00");return Math.round((b-a)/DIA)}
@@ -1737,6 +1856,7 @@ function tab(cols,rows,vazio){if(!rows.length)return'<p class="muted">'+(vazio||
 function pf1(n){return br((Math.round(n*10)/10).toFixed(1))}
 function renderPainel(){if(!$("v-painel"))return;
   var per=+$("pPer").value,cu=$("pCult").value,ta=$("pTal").value,au=$("pAut").value,cob=+$("pCob").value;lsSet("ml_pCob",cob);
+  fillCtxSel("pFaz","pSafra");
   var base=S.all.filter(function(r){return!r.teste&&(!cu||r.cultura===cu)&&(!au||doAut(r,au))});
   var tals=uniq((S.tal?S.tal.features.map(nomeTal):[]).concat(S.all.map(function(r){return r.talhao})));
   fillSel("pTal",tals,"Todos talhões");fillSel("pAut",uniq(S.all.map(function(r){return r.autorNome||"(sem nome)"})),"Todos técnicos");
