@@ -1007,7 +1007,14 @@ details summary{cursor:pointer;margin-top:12px}
    <div style="font-weight:600">Tema</div>
    <div class="seg" id="tema" style="margin-top:8px"><button type="button" data-v="">Automático</button><button type="button" data-v="light">Claro</button><button type="button" data-v="dark">Escuro</button></div>
   </div>
-  <p class="muted">Piloto. O mapa precisa de internet para carregar as imagens; o registro e o GPS funcionam sem sinal.</p>
+  <div class="card">
+   <div style="font-weight:600">Usar sem internet</div>
+   <p class="muted" id="offApp">Verificando…</p>
+   <p class="muted">Para ver o satélite no campo sem sinal, baixe as imagens da fazenda uma vez, de preferência no Wi-Fi (são cerca de <span id="offN">1.600</span> imagens, uns 30 a 60 MB).</p>
+   <button type="button" class="btn p full" id="offBaixar">Baixar mapa da fazenda</button>
+   <div class="muted" id="offStat" style="margin-top:8px"></div>
+  </div>
+  <p class="muted">O registro e o GPS funcionam sem sinal. Os lançamentos são enviados para a nuvem quando o sinal voltar.</p>
  </div></section>
 </main>
 
@@ -1151,7 +1158,7 @@ function go(v){VIEW=v;var navv=v==="ocor"?"talhoes":v==="reg"?(S.talSel?"talhoes
   $("mapwrap").classList.toggle("talmode",!!S.talSel);
   document.querySelector("#v-mapa .bar").classList.toggle("hide",!!S.talSel);
   if(v==="mapa"&&map){setTimeout(function(){map.invalidateSize()},50);renderMap();drawTalStyle();updDist()}
-  if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();
+  if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();if(v==="mais"){offInfo();var nt=tilesFazenda().length;if(nt)$("offN").textContent=nt.toLocaleString("pt-BR")}
   $("main").scrollTop=0;header()}
 document.querySelector("main").id="main";
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){if(b.dataset.v==="mapa"||b.dataset.v==="talhoes")S.talSel=null;go(b.dataset.v);if(b.dataset.v==="mapa")fitAll()}});
@@ -1796,6 +1803,27 @@ $("pAtual").onclick=function(){sincronizar(false)};
 $("v-painel").addEventListener("mousemove",function(e){var t=e.target.closest("[data-tip]"),tp=$("pTip");if(!t){tp.style.display="none";return}
   tp.textContent=t.dataset.tip;tp.style.display="block";tp.style.left=Math.min(e.clientX+12,innerWidth-150)+"px";tp.style.top=(e.clientY-30)+"px"});
 $("v-painel").addEventListener("touchstart",function(e){var t=e.target.closest("[data-tip]");if(t)toast(t.dataset.tip)},{passive:true});
+
+/* ---------- uso sem internet (service worker) ---------- */
+var swOk=("serviceWorker" in navigator)&&(location.protocol==="https:"||location.hostname==="localhost");
+function offInfo(){var el=$("offApp");if(!el)return;
+  if(!swOk){el.textContent="⚠️ Abra pelo link https://monitorlavoura.com.br para o app ficar guardado no aparelho.";$("offBaixar").disabled=true;return}
+  el.textContent=navigator.serviceWorker.controller?"✅ App guardado neste aparelho: abre mesmo sem internet.":"⏳ Guardando o app neste aparelho… feche e abra de novo com internet para concluir.";
+  var d=lsGet("ml_mapaOff");$("offStat").textContent=d?"🗺️ Mapa da fazenda baixado em "+quando(d)+".":""}
+if(swOk){navigator.serviceWorker.register("sw.js").then(function(){return navigator.serviceWorker.ready}).then(offInfo,offInfo);navigator.serviceWorker.addEventListener("controllerchange",offInfo)}
+function tilesFazenda(){var S2={},out=[];function t(lon,lat,z){var n=Math.pow(2,z),la=lat*Math.PI/180;return[Math.floor((lon+180)/360*n),Math.floor((1-Math.log(Math.tan(la)+1/Math.cos(la))/Math.PI)/2*n)]}
+  (S.tal?S.tal.features:[]).forEach(function(f){var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;polys(f).forEach(function(p){p.forEach(function(r){r.forEach(function(c){x0=Math.min(x0,c[0]);x1=Math.max(x1,c[0]);y0=Math.min(y0,c[1]);y1=Math.max(y1,c[1])})})});
+    for(var z=12;z<=17;z++){var a=t(x0,y1,z),b=t(x1,y0,z);for(var x=a[0];x<=b[0];x++)for(var y=a[1];y<=b[1];y++){var k=z+"/"+y+"/"+x;if(!S2[k]){S2[k]=1;out.push("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"+k)}}}});
+  return out}
+$("offBaixar").onclick=function(){var b=$("offBaixar");if(!swOk)return;navigator.serviceWorker.ready.then(function(reg){var urls=tilesFazenda(),ch=new MessageChannel();
+  if(!urls.length){toast("Nenhum talhão para baixar");return}if(!reg.active){toast("Ainda guardando o app, tente em instantes");return}
+  b.disabled=true;$("offStat").textContent="Baixando 0 de "+urls.length+"…";
+  ch.port1.onmessage=function(m){var d=m.data;if(d.fim){b.disabled=false;var falt=d.total-d.ok;
+      if(!d.ok){$("offStat").textContent="⚠️ Não consegui baixar. Confira a internet e tente de novo.";return}
+      if(falt>urls.length*0.05){$("offStat").textContent="⚠️ Baixou "+d.ok+" de "+d.total+". A conexão falhou em parte, toque de novo para completar (o que já baixou não baixa de novo).";return}
+      lsSet("ml_mapaOff",new Date().toISOString());offInfo();toast("Mapa da fazenda guardado")}
+    else $("offStat").textContent="Baixando "+d.n+" de "+d.total+"…"};
+  reg.active.postMessage({tipo:"mapa",urls:urls},[ch.port2])})};
 
 /* ---------- tema ---------- */
 function tema(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme");setSeg("tema",v);lsSet("ml_tema",v)}
