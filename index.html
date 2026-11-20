@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2f6b3a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -679,7 +679,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121613;--card:#1c221d;--fg:#e6ece6;--mut:#9aa69c;--line:#2d362f;--pri:#6fbf7d;--pri2:#24352a;--onpri:#0e1a10}}
 :root[data-theme="dark"]{--bg:#121613;--card:#1c221d;--fg:#e6ece6;--mut:#9aa69c;--line:#2d362f;--pri:#6fbf7d;--pri2:#24352a;--onpri:#0e1a10}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 header{display:flex;align-items:center;gap:8px;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:var(--pri);color:var(--onpri)}
 header .hb{border:0;background:none;color:inherit;font-size:22px;width:36px;height:36px;display:none;padding:0}
 header .ht{flex:1;min-width:0;line-height:1.15}
@@ -692,18 +692,18 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);b
 nav button{flex:1;border:0;background:none;color:var(--mut);padding:9px 0 8px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
 nav button svg{width:22px;height:22px}
 nav button.on{color:var(--pri);font-weight:600}
-main{position:absolute;top:calc(52px + env(safe-area-inset-top));bottom:calc(58px + env(safe-area-inset-bottom));left:0;right:0;overflow:auto}
+main{overflow-x:hidden;overscroll-behavior:contain;position:absolute;top:calc(52px + env(safe-area-inset-top));bottom:calc(58px + env(safe-area-inset-bottom));left:0;right:0;overflow:auto}
 .view{display:none;min-height:100%}
 .view.on{display:block}
 #v-mapa.on{display:flex;flex-direction:column;height:100%}
 .bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--line)}
 .bar select{flex:0 0 auto;width:auto}
-.mapwrap{position:relative;flex:1;display:flex}
+.mapwrap{position:relative;flex:1;display:flex;overflow:hidden}
 #map{flex:1;min-height:200px;background:#5d6b5a}
 .pad{padding:12px 16px 24px;max-width:720px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
-input,select,textarea{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
 input[readonly]{opacity:.8}
 textarea{min-height:64px}
 .row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
@@ -737,7 +737,7 @@ th{color:var(--mut);font-weight:500}
 .fab button{width:42px;height:42px;border-radius:50%;border:0;background:var(--card);color:var(--fg);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.3);padding:0}
 .fab svg{width:22px;height:22px}
 .legend{position:absolute;left:10px;bottom:10px;z-index:800;background:var(--card);border-radius:8px;padding:5px 8px;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
-.acoes{position:absolute;left:0;right:0;bottom:10px;z-index:800;display:none;gap:10px;overflow-x:auto;padding:0 12px;scroll-snap-type:x mandatory}
+.acoes{overscroll-behavior-x:contain;touch-action:pan-x;position:absolute;left:0;right:0;bottom:10px;z-index:800;display:none;gap:10px;overflow-x:auto;padding:0 12px;scroll-snap-type:x mandatory}
 .acoes button{flex:0 0 150px;height:96px;border:0;border-radius:12px;color:#fff;text-align:left;padding:12px;font-size:16px;font-weight:600;position:relative;scroll-snap-align:start;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .acoes button svg{position:absolute;right:10px;bottom:10px;width:30px;height:30px;padding:5px;border-radius:50%;background:rgba(255,255,255,.22)}
 .acoes .a1{background:#1f8a43}.acoes .a2{background:#6cc36a}.acoes .a3{background:#2a7de1}.acoes .a4{background:#9b6b2f}
