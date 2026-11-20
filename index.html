@@ -899,8 +899,10 @@ details summary{cursor:pointer;margin-top:12px}
    <div class="card m-mon hide" id="alvoBox"><label style="margin-top:0" id="alvoLbl">Qual?</label><div id="alvoChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div><input id="alvo" list="dlAlvo" placeholder="Não está na lista? Digite aqui"></div>
    <div class="m-mon" id="indBox"><div class="indt">Indicadores</div><div id="indList"></div></div>
    <div class="card m-mon">
-    <div id="presBox" class="hide"><label style="margin-top:0">Percevejo no ponto</label>
-     <div class="seg lv" id="pres"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1">Presente</button></div><label></label></div>
+    <div id="presBox" class="hide"><label style="margin-top:0">Barriga-verde (Diceraeus)</label>
+     <div class="seg lv pres" data-esp="0"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1">Presente</button></div>
+     <label>Marrom (Euschistus)</label>
+     <div class="seg lv pres" data-esp="1"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1">Presente</button></div><label></label></div>
     <div id="nivBox"><label style="margin-top:0">Nível de infestação</label>
     <div class="seg lv" id="nivel"><button type="button" data-v="0">Ausente</button><button type="button" data-v="1" class="on">Baixo</button><button type="button" data-v="2">Médio</button><button type="button" data-v="3">Alto</button></div></div>
     <label>Recomendação</label>
@@ -1433,8 +1435,10 @@ document.querySelectorAll("#acoes button").forEach(function(b){b.onclick=functio
 /* ---------- monitoramento por ponto e ocorrência ---------- */
 function ehPA(a){return!!(OC[a]&&OC[a].pa)}
 function nivTxt(r){return r.presenca!=null?(r.presenca?"Presente":"Ausente"):NIV[r.nivel]}
-function aplicaPA(){var pa=ehPA(S.oc);$("presBox").classList.toggle("hide",!pa);$("nivBox").classList.toggle("hide",pa);$("indBox").classList.toggle("hide",pa||S.modo!=="monitoramento");if(pa)setSeg("pres",S.pres==null?"":S.pres?1:0)}
-$("pres").querySelectorAll("button").forEach(function(b){b.onclick=function(){S.pres=b.dataset.v==="1";setSeg("pres",b.dataset.v)}});
+var ESP_PA=["Barriga-verde (Diceraeus)","Marrom (Euschistus)"];S.presE=[null,null];
+function segPres(){document.querySelectorAll("#presBox .pres").forEach(function(d){var v=S.presE[+d.dataset.esp];d.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",v!=null&&b.dataset.v===(v?"1":"0"))})})}
+function aplicaPA(){var pa=ehPA(S.oc);$("presBox").classList.toggle("hide",!pa);$("nivBox").classList.toggle("hide",pa);$("indBox").classList.toggle("hide",pa||S.modo!=="monitoramento");if(pa)segPres()}
+document.querySelectorAll("#presBox .pres").forEach(function(d){d.querySelectorAll("button").forEach(function(b){b.onclick=function(){S.presE[+d.dataset.esp]=b.dataset.v==="1";S.pres=S.presE[0]||S.presE[1];segPres()}})});
 function nomeOc(){var o=OC[S.oc];return o&&o.gen?($("alvo").value.trim()||S.oc):(S.oc||"Monitoramento")}
 function novoPonto(){S.oc=null;novo("monitoramento");S.ponto={id:uid(),feitos:[]};$("ocCult").value=$("cultura").value;travaCult();$("ocEst").value=$("estadio").value;renderOcGrid();go("ocor");posForm()}
 function renderOcGrid(){var c=$("ocCult").value,f=(S.ponto&&S.ponto.feitos)||[];
@@ -1446,7 +1450,7 @@ $("ocEst").oninput=function(){$("estadio").value=$("ocEst").value};
 function fimPonto(){var n=S.ponto?S.ponto.feitos.length:0;S.ponto=null;S.manual=null;if(n)toast(n+(n>1?" ocorrências salvas":" ocorrência salva")+" neste ponto");go(S.talSel?"mapa":"talhoes")}
 $("ocFim").onclick=fimPonto;
 function abrirOc(k){var c=$("ocCult").value,e=$("ocEst").value;novo("monitoramento");$("cultura").value=c;$("estadio").value=e;
-  S.oc=k;S.pres=null;S.tipo=OC[k].tipo;$("alvo").value=OC[k].gen?"":k;$("alvoLbl").textContent=OC[k].lbl||"Qual?";fillAlvos();setModo("monitoramento");renderBanner();renderChips();renderInd();aplicaPA();VOLTA="ocor";go("reg")}
+  S.oc=k;S.pres=null;S.presE=[null,null];S.tipo=OC[k].tipo;$("alvo").value=OC[k].gen?"":k;$("alvoLbl").textContent=OC[k].lbl||"Qual?";fillAlvos();setModo("monitoramento");renderBanner();renderChips();renderInd();aplicaPA();VOLTA="ocor";go("reg")}
 function renderChips(){var cv=$("cultura").value,t=S.tipo,l=[];if(ALV[cv])l=ALV[cv][t]||[];else Object.keys(ALV).forEach(function(k){(ALV[k][t]||[]).forEach(function(a){if(l.indexOf(a)<0)l.push(a)})});
   var v=$("alvo").value.trim();
   $("alvoChips").innerHTML=l.map(function(a){return'<button type="button" class="btn'+(a===v?" p":"")+'" style="padding:7px 10px;font-size:14px;white-space:normal;text-align:left" data-a="'+esc(a)+'">'+esc(a)+'</button>'}).join("");
@@ -1477,7 +1481,7 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
   if(lat==null||lng==null){toast(TESTE?"Escolha um talhão com limite no mapa":"Sem GPS. Toque em \"Marcar no mapa\"");return}
   if(!$("talhao").value.trim()){toast("Informe o talhão");return}
   if(m==="monitoramento"&&!$("alvo").value.trim()){toast("Escolha o alvo");return}
-  if(m==="monitoramento"&&ehPA(S.oc)&&S.pres==null){toast("Marque Presente ou Ausente");return}
+  if(m==="monitoramento"&&ehPA(S.oc)&&(S.presE[0]==null||S.presE[1]==null)){toast("Marque Presente ou Ausente para barriga-verde e marrom");return}
   if(m==="estadio"&&!$("estadio").value.trim()){toast("Informe o estádio");return}
   if(m==="aplicacao"&&!$("produto").value.trim()){toast("Informe o produto");return}
   var pla=m==="plantio"?calcPla():null;if(m==="plantio"&&!pla.pm){toast(S.pModo==="dist"?"Lance pelo menos 2 distâncias":"Informe plantas e metros");return}
@@ -1492,7 +1496,7 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
   if(m==="monitoramento"){var o=OC[S.oc]||{};r.tipo=o.tipo||S.tipo;r.alvo=$("alvo").value.trim();r.nivel=S.nivel;r.itens=lerInd();r.ponto=old?old.ponto:(S.ponto?S.ponto.id:null);
     if(o.soma){r.unidade=o.un;r.contagem=r.itens.length?Math.round(r.itens.reduce(function(a,b){return a+b.qtd},0)*100)/100:null}
     else if(r.itens.length){r.contagem=r.itens[0].qtd;r.unidade=r.itens[0].un}else{r.contagem=null;r.unidade=""}
-    if(ehPA(S.oc)){r.presenca=!!S.pres;r.nivel=S.pres?1:0;r.itens=[];r.contagem=S.pres?1:0;r.unidade="presença"}
+    if(ehPA(S.oc)){var pp=!!(S.presE[0]||S.presE[1]);r.presenca=pp;r.nivel=pp?1:0;r.itens=ESP_PA.map(function(n,i){return{alvo:n,qtd:S.presE[i]?1:0,un:"presença"}});r.contagem=pp?1:0;r.unidade="presença"}
     r.acao=S.acao;if(S.acao==="recomendado"){r.produto=$("produtoRec").value.trim();r.dose=$("doseRec").value.trim()}}
   else if(m==="plantio"){r.pla=pla}
   else if(m==="aplicacao"){r.acao="aplicado";r.alvo=$("alvoApl").value.trim();r.produto=$("produto").value.trim();r.dose=$("dose").value.trim();r.calda=$("calda").value.trim()}
@@ -1508,7 +1512,7 @@ function editar(id){var r=S.all.filter(function(x){return x.id===id})[0];if(!r)r
   if(g==="monitoramento"){$("alvo").value=r.alvo||"";S.tipo=r.tipo||"praga";S.nivel=r.nivel||0;S.acao=r.acao==="recomendado"?"recomendado":"monitoramento";
     S.oc=OC[r.alvo]?r.alvo:S.tipo==="doenca"?"Doença":S.tipo==="daninha"?"Daninha":"Outra praga";$("alvoLbl").textContent=OC[S.oc].lbl||"Qual?";
     setSeg("nivel",S.nivel);setSeg("acao",S.acao);$("m-rec").classList.toggle("hide",S.acao!=="recomendado");$("produtoRec").value=r.produto||"";$("doseRec").value=r.dose||"";fillAlvos();setModo("monitoramento");
-    var it=r.itens&&r.itens.length?r.itens:(r.contagem!=null?[{alvo:indicadores(S.oc)[0].n,qtd:r.contagem,un:r.unidade}]:[]);renderBanner();renderChips();renderInd(it);S.pres=r.presenca!=null?r.presenca:((r.nivel||0)>0||(r.contagem||0)>0);aplicaPA()}
+    var it=r.itens&&r.itens.length?r.itens:(r.contagem!=null?[{alvo:indicadores(S.oc)[0].n,qtd:r.contagem,un:r.unidade}]:[]);renderBanner();renderChips();renderInd(it);S.pres=r.presenca!=null?r.presenca:((r.nivel||0)>0||(r.contagem||0)>0);S.presE=ESP_PA.map(function(n){var x=(r.itens||[]).filter(function(i){return i.alvo===n})[0];return x?x.qtd>0:(S.pres===false?false:null)});aplicaPA()}
   if(g==="plantio"&&r.pla){var q=r.pla;S.pModo=q.modo;setSeg("pModo",q.modo);$("pAlvo").value=q.alvoHa||"";$("pEsp").value=q.esp?br(q.esp):"";S.pd=(q.dists||[]).slice();$("pCont").value=q.cont!=null?q.cont:"";$("pMet").value=q.metros!=null?br(q.metros):"";renderPla()}
   if(g==="aplicacao"){$("alvoApl").value=r.alvo||"";$("produto").value=r.produto||"";$("dose").value=r.dose||""}
   S.foto=r.foto||null;showFoto();$("gpsInfo").classList.remove("warn");$("gpsInfo").textContent="📍 Posição salva do ponto"+(r.precisao!=null?" (±"+r.precisao+" m)":"")+". Não muda ao editar.";
@@ -1530,7 +1534,7 @@ function renderGrupo(itens){var l=especies($("alvo").value.trim()),box=$("grupo"
   box.querySelectorAll(".gq").forEach(function(i){i.oninput=somaGrupo});somaGrupo()}
 function itensGrupo(){var out=[];document.querySelectorAll("#grupo .gq").forEach(function(i){var n=num(i.value);if(n!=null&&n>0)out.push({alvo:i.dataset.e,qtd:n})});return out}
 function somaGrupo(){var it=itensGrupo();$("contagem").value=it.length?br(Math.round(it.reduce(function(a,b){return a+b.qtd},0)*100)/100):""}
-function detalhe(r){return(r.itens||[]).map(function(i){return i.alvo.replace(/ \(.*\)$/,"")+": "+br(i.qtd)+(i.un&&!(OC[r.alvo]&&OC[r.alvo].soma)?" "+i.un:"")}).join(", ")}
+function detalhe(r){return(r.itens||[]).map(function(i){if(i.un==="presença")return i.alvo.replace(/ \(.*\)$/,"")+": "+(i.qtd>0?"presente":"ausente");return i.alvo.replace(/ \(.*\)$/,"")+": "+br(i.qtd)+(i.un&&!(OC[r.alvo]&&OC[r.alvo].soma)?" "+i.un:"")}).join(", ")}
 function unidPadrao(a){var k=Object.keys(UNID).filter(function(k){return a.indexOf(k)===0})[0];return k?UNID[k]:""}
 function fillRapidos(){return;var c=$("cultura").value,l=(RAPIDO[S.tipo]||[]).filter(function(a){return c==="Outra"||!ALV[c]||ALV[c][S.tipo].indexOf(a)>=0});
   $("rapidos").innerHTML=l.map(function(a){return'<button type="button" class="btn" style="padding:6px 10px;font-size:13px" data-a="'+esc(a)+'">'+esc(a)+'</button>'}).join("");
