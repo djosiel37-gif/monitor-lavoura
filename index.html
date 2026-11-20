@@ -978,9 +978,9 @@ details summary{cursor:pointer;margin-top:12px}
    <div style="font-weight:600">Fazenda</div>
    <div class="row" style="margin-top:8px"><select id="plFaz"></select><button type="button" class="btn" id="plFazNova" style="flex:0 0 auto">+ Nova fazenda</button></div>
    <div id="plFazBox" class="hide" style="margin-top:8px"><label>Nome da fazenda</label><input id="plFazNome" placeholder="Ex: Fazenda Boa Vista">
-    <label>Limites dos talhões (KML ou GeoJSON)</label><input type="file" id="plFazKml" accept=".kml,.geojson,.json">
+    <label>Limites dos talhões (KML, KMZ, ZIP ou GeoJSON). Pode deixar para depois.</label><input type="file" id="plFazKml" multiple>
     <button type="button" class="btn p full" id="plFazSalvar" style="margin-top:8px">Criar fazenda</button></div>
-   <button type="button" class="btn" id="plFazTal" style="margin-top:8px">Trocar limites dos talhões desta fazenda</button><input type="file" id="plFazTalF" accept=".kml,.geojson,.json" style="display:none">
+   <button type="button" class="btn" id="plFazTal" style="margin-top:8px">Trocar limites dos talhões desta fazenda</button><input type="file" id="plFazTalF" multiple style="display:none">
   </div>
   <div class="card">
    <div style="font-weight:600">Safra atual</div>
@@ -1031,7 +1031,7 @@ details summary{cursor:pointer;margin-top:12px}
    <div style="font-weight:600">Limites de talhões</div>
    <p class="muted">Já vem com os talhões da Fazenda Lindos Campos. Para trocar, importe outro KML ou GeoJSON.</p>
    <div class="row"><button class="btn" id="iTalB">Importar KML / GeoJSON</button><button class="btn" id="rTal">Voltar ao padrão</button></div>
-   <input type="file" id="iTal" accept=".kml,.geojson,.json" style="display:none">
+   <input type="file" id="iTal" multiple style="display:none">
   </div>
   <div class="card">
    <div style="font-weight:600">Modo teste</div>
@@ -1624,6 +1624,25 @@ $("iJson").onchange=function(){var f=this.files[0];if(!f)return;f.text().then(fu
   return p.then(load).then(function(){toast(n+" registros importados/atualizados")})}).catch(function(e){toast("Não consegui importar: "+e.message)});this.value=""};
 
 /* ---------- limites de talhões ---------- */
+/* lê KML/GeoJSON, inclusive dentro de KMZ ou ZIP */
+function textoGeo(f){return f.arrayBuffer().then(function(buf){var u=new Uint8Array(buf);
+  if(!(u[0]===0x50&&u[1]===0x4b))return new TextDecoder().decode(u);
+  var dv=new DataView(buf),e=-1;for(var i=u.length-22;i>=Math.max(0,u.length-70000);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break}}
+  if(e<0)throw new Error("arquivo compactado inválido");
+  var n=dv.getUint16(e+10,true),p=dv.getUint32(e+16,true),ents=[];
+  for(var k=0;k<n;k++){var mt=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    var nm=new TextDecoder().decode(u.subarray(p+46,p+46+nl));ents.push({nm:nm,mt:mt,cs:cs,off:off});p+=46+nl+xl+cl}
+  ents=ents.filter(function(x){return/\.(kml|geojson|json)$/i.test(x.nm)&&!/(^|\/)(__MACOSX|\.)/.test(x.nm)});
+  if(!ents.length)throw new Error("não achei KML dentro do arquivo");
+  return Promise.all(ents.map(function(en){var lh=en.off,d0=lh+30+dv.getUint16(lh+26,true)+dv.getUint16(lh+28,true),dados=u.subarray(d0,d0+en.cs);
+    if(en.mt===0)return new TextDecoder().decode(dados);
+    if(en.mt!==8||!window.DecompressionStream)throw new Error("não consegui abrir o arquivo compactado; envie os .kml");
+    return new Response(new Blob([dados]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text()}))})}
+/* junta vários arquivos (ou vários KML dentro de um ZIP) num só mapa de talhões */
+function lerGeo(files){files=files&&files.length!=null?Array.prototype.slice.call(files):[files];
+  return Promise.all(files.map(textoGeo)).then(function(ls){var fs=[];[].concat.apply([],ls.map(function(x){return Array.isArray(x)?x:[x]})).forEach(function(t){
+    var g=/^\s*</.test(t)?kmlToGeo(t):JSON.parse(t);(g&&g.features||[]).forEach(function(f){fs.push(f)})});
+    if(!fs.length)throw new Error("nenhum polígono encontrado no arquivo");return{type:"FeatureCollection",features:fs}})}
 function kmlToGeo(txt){var d=new DOMParser().parseFromString(txt,"text/xml"),fs=[];
   Array.prototype.forEach.call(d.getElementsByTagName("Placemark"),function(pm){var nm=pm.getElementsByTagName("name")[0];nm=nm?nm.textContent.trim():"";
     Array.prototype.forEach.call(pm.getElementsByTagName("Polygon"),function(pg){var rings=[];Array.prototype.forEach.call(pg.getElementsByTagName("coordinates"),function(c){
@@ -1635,7 +1654,7 @@ function drawTal(){return talhoesFaz().then(function(g){S.tal=g;if(!map)return;i
     l.on("click",function(e){if(S.picking){L.DomEvent.stop(e);pickAt(e.latlng);return}if(S.talSel===n)return;toast("Talhão "+n);abrirTalhao(n)})}}).addTo(map);
   talLayer.bringToBack();drawTalStyle()})}
 $("iTalB").onclick=function(){$("iTal").click()};
-$("iTal").onchange=function(){var f=this.files[0];if(!f)return;f.text().then(function(t){var g=/^\s*</.test(t)?kmlToGeo(t):JSON.parse(t);
+$("iTal").onchange=function(){var f=this.files;if(!f.length)return;lerGeo(f).then(function(g){
   if(!g||!g.features||!g.features.length)throw new Error("nenhum polígono encontrado");
   return cfgSet("talhoes",g).then(drawTal).then(load).then(function(){toast(g.features.length+" limites importados");go("talhoes")})}).catch(function(e){toast("Erro: "+e.message)});this.value=""};
 $("rTal").onclick=function(){cfgSet("talhoes",null).then(drawTal).then(load).then(function(){toast("Talhões da fazenda restaurados")})};
@@ -1820,14 +1839,14 @@ function renderPlano(){var fs=fazendas();$("plFaz").innerHTML=fs.map(function(f)
   var dis=!at;["plSalvar","plBulk","plTodos"].forEach(function(id){$(id).disabled=dis});$("plMsg").textContent=""}
 $("plFaz").onchange=function(){mudaFaz(this.value);setTimeout(renderPlano,300)};
 $("plFazNova").onclick=function(){$("plFazBox").classList.toggle("hide")};
-function lerGeo(f){return f.text().then(function(t){var g=/^\s*</.test(t)?kmlToGeo(t):JSON.parse(t);if(!g||!g.features||!g.features.length)throw new Error("nenhum polígono encontrado no arquivo");return g})}
+
 function slug(n){return n.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||uid()}
 function gravaFaz(id,body){return renova().then(function(){return api("/rest/v1/fazendas?on_conflict=id",{m:"POST",b:Object.assign({id:id,alterado:new Date().toISOString()},body),h:{Prefer:"resolution=merge-duplicates,return=minimal"},tempo:120000})})}
-$("plFazSalvar").onclick=function(){var nm=$("plFazNome").value.trim(),f=$("plFazKml").files[0],b=this;if(nm.length<3){toast("Digite o nome da fazenda");return}if(!f){toast("Escolha o arquivo KML dos talhões");return}
-  b.disabled=true;var id=slug(nm);lerGeo(f).then(function(g){return gravaFaz(id,{nome:nm,talhoes:g,tem_tal:true})}).then(puxaCfg).then(function(){$("plFazBox").classList.add("hide");$("plFazNome").value="";$("plFazKml").value="";mudaFaz(id);setTimeout(renderPlano,400);toast("Fazenda criada")})
+$("plFazSalvar").onclick=function(){var nm=$("plFazNome").value.trim(),f=$("plFazKml").files,b=this;f=f&&f.length?f:null;if(nm.length<3){toast("Digite o nome da fazenda");return}b.disabled=true;var id=slug(nm);if(fazendas().some(function(x){return x.id===id})){b.disabled=false;toast("Essa fazenda já existe");return}
+  (f?lerGeo(f):Promise.resolve(null)).then(function(g){return gravaFaz(id,g?{nome:nm,talhoes:g,tem_tal:true}:{nome:nm})}).then(puxaCfg).then(function(){$("plFazBox").classList.add("hide");$("plFazNome").value="";$("plFazKml").value="";mudaFaz(id);setTimeout(renderPlano,400);toast("Fazenda criada")})
    .catch(function(e){toast("Erro: "+e.message)}).then(function(){b.disabled=false})};
 $("plFazTal").onclick=function(){$("plFazTalF").click()};
-$("plFazTalF").onchange=function(){var f=this.files[0];if(!f)return;var fz=fazAt();lerGeo(f).then(function(g){return gravaFaz(fz.id,{nome:fz.nome,talhoes:g,tem_tal:true})}).then(puxaCfg).then(drawTal).then(load).then(function(){renderPlano();toast("Limites atualizados")}).catch(function(e){toast("Erro: "+e.message)});this.value=""};
+$("plFazTalF").onchange=function(){var f=this.files;if(!f.length)return;var fz=fazAt();lerGeo(f).then(function(g){return gravaFaz(fz.id,{nome:fz.nome,talhoes:g,tem_tal:true})}).then(puxaCfg).then(drawTal).then(load).then(function(){renderPlano();toast("Limites atualizados")}).catch(function(e){toast("Erro: "+e.message)});this.value=""};
 $("plSafraNova").onclick=function(){var nm=$("plSafraNome").value.trim().replace(/\s+/g," "),fz=fazAt();if(nm.length<4){toast("Digite o nome da safra");return}
   if(safrasFaz().indexOf(nm)>=0){toast("Essa safra já existe");return}
   renova().then(function(){return api("/rest/v1/safras",{m:"POST",b:{fazenda:fz.id,nome:nm},h:{Prefer:"return=minimal"}})})
