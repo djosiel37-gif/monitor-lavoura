@@ -1007,7 +1007,7 @@ details summary{cursor:pointer;margin-top:12px}
   <div class="card" id="cSync">
    <div style="font-weight:600">Usuário e sincronização</div>
    <div class="sinc" id="sStat"></div>
-   <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="sBtn">Enviar para a nuvem</button><button type="button" class="btn" id="sSair">Trocar usuário</button></div>
+   <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="sBtn">Enviar para a nuvem</button><button type="button" class="btn" id="sSair">Sair do app</button></div>
    <div id="supBox" class="hide" style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
     <div style="font-weight:600">Usuários e cargos</div>
     <p class="muted" style="margin:4px 0 8px">Técnico: lança e vê só os próprios. Supervisão (gerência/diretoria): vê tudo e lança, sem alterar o dos outros. Administrador: faz tudo. O login precisa estar criado no Supabase (Authentication › Users).</p>
@@ -1796,8 +1796,8 @@ function listaSup(){var box=$("supLista");box.innerHTML='<p class="muted">Carreg
 var autoAviso=0;function confirmaAuto(b){if(Date.now()-autoAviso<5000)return true;autoAviso=Date.now();toast("Você está tirando o seu próprio cargo de administrador. Escolha de novo em até 5 s para confirmar.");return false}
 $("supAbrir").onclick=listaSup;
 $("sSair").onclick=function(){var b=$("sSair");
-  if(S.pend&&nuvemOk()&&U&&!U.local&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Há "+S.pend+" não enviados. Toque de novo";setTimeout(function(){b.dataset.c="";b.textContent="Trocar usuário"},3500);return}
-  b.dataset.c="";b.textContent="Trocar usuário";var em=U&&U.email;U=em?{email:em}:null;lsSet("ml_sess","");U=null;if(em)$("lEmail").value=em;mostraLogin()};
+  if(S.pend&&nuvemOk()&&U&&!U.local&&b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Há "+S.pend+" não enviados. Toque de novo";setTimeout(function(){b.dataset.c="";b.textContent="Sair do app"},3500);return}
+  b.dataset.c="";b.textContent="Sair do app";var em=U&&U.email;U=em?{email:em}:null;lsSet("ml_sess","");U=null;if(em)$("lEmail").value=em;mostraLogin()};
 $("cfSalvar").onclick=function(){var u=$("cfUrl").value.trim(),k=$("cfKey").value.trim();
   if(u&&!/^https:\/\/[^\s]+$/.test(u)){toast("O endereço deve começar com https://");return}
   lsSet("ml_supa_url",u);lsSet("ml_supa_key",k);statusSync();toast(u&&k?"Nuvem configurada":"Configuração removida");if(precisaLogin())mostraLogin()};
