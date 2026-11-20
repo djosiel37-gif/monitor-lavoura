@@ -748,6 +748,9 @@ th{color:var(--mut);font-weight:500}
 .talmode .chip,.talmode .acoes{display:flex}.talmode .chip{display:block}
 .talmode .legend{bottom:116px}
 .talmode .leaflet-control-zoom{display:none}
+.talmode #bFilt{display:none}
+#bFilt{position:relative}#bFilt.on{background:var(--pri);color:var(--onpri)}
+#bFilt i{display:none;position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:var(--a);border:2px solid var(--card)}#bFilt.ativo i{display:block}
 .pin{width:30px;height:30px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.5);position:relative}
 .pin svg{width:17px;height:17px}
 .pin .cam{position:absolute;top:-7px;right:-9px;width:17px;height:17px;border-radius:50%;background:#333;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center}
@@ -878,6 +881,7 @@ details summary{cursor:pointer;margin-top:12px}
    <div id="map"></div>
    <div class="chip" id="dist">Buscando GPS…</div>
    <div class="fab">
+    <button id="bFilt" title="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></svg><i></i></button>
     <button id="bLayer" title="Satélite / Mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 17l10 5 10-5"/></svg></button>
     <button id="bList" title="Lista de registros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/></svg></button>
     <button id="bMe" title="Centralizar no GPS"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg></button>
@@ -1231,7 +1235,7 @@ function go(v){VIEW=v;var navv=v==="ocor"?"talhoes":v==="reg"?(S.talSel?"talhoes
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.v===navv)});
   document.querySelectorAll(".view").forEach(function(s){s.classList.toggle("on",s.id==="v-"+v)});
   $("mapwrap").classList.toggle("talmode",!!S.talSel);
-  document.querySelector("#v-mapa .bar").classList.toggle("hide",!!S.talSel);
+  document.querySelector("#v-mapa .bar").classList.toggle("hide",!!S.talSel||!S.filtOn);
   if(v==="mapa"&&map){setTimeout(function(){map.invalidateSize()},50);renderMap();drawTalStyle();updDist()}
   if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();if(v==="plano")renderPlano();if(v==="mais"){offInfo();var nt=tilesFazenda().length;if(nt)$("offN").textContent=nt.toLocaleString("pt-BR")}
   $("main").scrollTop=0;header()}
@@ -1303,7 +1307,7 @@ function renderMap(){
   var rs=filtrados(),modo=S.talSel?"pts":$("fModo").value;
   if(modo!=="heat")rs.slice().sort(function(a,b){return(a.nivel||0)-(b.nivel||0)}).forEach(function(r){L.marker([r.lat,r.lng],{icon:icone(r)}).bindPopup(popup(r)).addTo(ptLayer)});
   if(modo!=="pts"&&L.heatLayer){var hd=heatData(rs);heatLayer=L.heatLayer(hd.pts,{radius:30,blur:22,maxZoom:17,max:1,gradient:hd.grad}).addTo(map)}
-  setLegend(modo!=="pts"&&!S.talSel?heatData(rs):null);drawTalStyle();renderSide()
+  setLegend(modo!=="pts"&&!S.talSel?heatData(rs):null);drawTalStyle();renderSide();marcaFilt()
 }
 /* ---------- mapa de calor ---------- */
 var RDENS=200;var GRAD_INF={.3:"#e3c22b",.6:"#ef8a1f",1:"#d7392f"},GRAD_APL={.3:"#9ecbff",.6:"#4d9be6",1:"#1a5fb4"};
@@ -1395,8 +1399,11 @@ function renderSide(){var el=$("mSide");if(!el||S.talSel)return;var RK=riscoTal(
     '<div class="sdT">Talhões</div>'+ord.map(function(n){var r=RK[n];return'<button type="button" class="sdR" data-t="'+esc(n)+'" title="Clique para ver no mapa · duplo clique abre o talhão"><span class="sq" style="'+(r?"background:"+RISCO[r.mx]+";border-color:"+RISCO[r.mx]:"")+'"></span><b>'+esc(n)+'</b><span>'+
       (r?RISCO_TXT[r.mx]+" · "+r.n+" ponto"+(r.n>1?"s":"")+" · "+fmtD(r.ult).slice(0,5):"sem monitoramento")+'</span></button>'}).join("")||'<p class="muted">Nenhum talhão nesta fazenda.</p>';
   el.querySelectorAll(".sdR").forEach(function(b){b.onclick=function(){fitTalNome(b.dataset.t)};b.ondblclick=function(){abrirTalhao(b.dataset.t)}})}
-$("fAut").onchange=function(){renderMap();$("hAut").value=$("fAut").value};$("hAut").onchange=function(){$("fAut").value=$("hAut").value;renderHist();renderMap()};
-["fPer","fTal","fAlvo","fModo"].forEach(function(id){$(id).onchange=function(){renderMap();lsSet("ml_"+id,$(id).value)}});
+$("fAut").onchange=function(){renderMap();$("hAut").value=$("fAut").value;marcaFilt()};$("hAut").onchange=function(){$("fAut").value=$("hAut").value;renderHist();renderMap()};
+["fPer","fTal","fAlvo","fModo"].forEach(function(id){$(id).onchange=function(){renderMap();lsSet("ml_"+id,$(id).value);marcaFilt()}});
+S.filtOn=false;
+function marcaFilt(){var at=$("fPer").value!=="30"||!!$("fTal").value||!!$("fAlvo").value||$("fModo").value!=="pts"||!!$("fAut").value;$("bFilt").classList.toggle("ativo",at);$("bFilt").classList.toggle("on",S.filtOn);$("bFilt").title=at?"Filtros (há filtro ativo)":"Filtros"}
+$("bFilt").onclick=function(){S.filtOn=!S.filtOn;document.querySelector("#v-mapa .bar").classList.toggle("hide",!S.filtOn);marcaFilt();if(map)setTimeout(function(){map.invalidateSize()},30)};
 function updDist(){var el=$("dist");if(!S.talSel)return;
   var ult=S.all.filter(function(r){return r.talhao===S.talSel&&r.lat!=null}).sort(function(a,b){return natCmp(b.criado,a.criado)})[0];
   if(!S.fix){el.textContent="Buscando sinal GPS…";return}
