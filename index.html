@@ -738,7 +738,7 @@ th{color:var(--mut);font-weight:500}
 .fab{position:absolute;right:10px;top:10px;z-index:800;display:flex;flex-direction:column;gap:8px}
 .fab button{width:42px;height:42px;border-radius:50%;border:0;background:var(--card);color:var(--fg);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.3);padding:0}
 .fab svg{width:22px;height:22px}
-.legend{position:absolute;left:10px;bottom:10px;z-index:800;background:var(--card);border-radius:8px;padding:5px 8px;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.legend{position:absolute;left:10px;bottom:10px;z-index:800;max-width:calc(100% - 74px);background:var(--card);border-radius:8px;padding:5px 8px;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .acoes{overscroll-behavior-x:contain;touch-action:pan-x;position:absolute;left:0;right:0;bottom:10px;z-index:800;display:none;gap:10px;overflow-x:auto;padding:0 12px;scroll-snap-type:x mandatory}
 .acoes button{flex:0 0 150px;height:96px;border:0;border-radius:12px;color:#fff;text-align:left;padding:12px;font-size:16px;font-weight:600;position:relative;scroll-snap-align:start;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .acoes button svg{position:absolute;right:10px;bottom:10px;width:30px;height:30px;padding:5px;border-radius:50%;background:rgba(255,255,255,.22)}
@@ -754,7 +754,7 @@ th{color:var(--mut);font-weight:500}
 .pin .cam svg{width:10px;height:10px}
 .leaflet-popup-content{font-size:13px;margin:10px 12px}
 .leaflet-popup-content img{max-width:180px;border-radius:6px;display:block;margin-top:4px}
-.tl{background:none;border:0;box-shadow:none;color:#fff;font-weight:700;font-size:11px;text-shadow:0 0 3px #000,0 0 2px #000;padding:0}.tl:before{display:none}.nolbl .tl{display:none}
+.tl{background:none;border:0;box-shadow:none;color:#fff;font-weight:700;font-size:11px;text-shadow:0 0 3px #000,0 0 2px #000;padding:0}.tl:before{display:none}.nolbl .tl:not(.tem):not(.sel){display:none}.nolbl2 .tl:not(.sel){display:none}
 .tl.sel{font-size:14px}
 #photoPrev img{max-width:140px;border-radius:8px;margin-top:6px}
 .tal{display:flex;align-items:center;gap:10px;cursor:pointer}
@@ -795,6 +795,25 @@ th{color:var(--mut);font-weight:500}
 .pgrid{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}.pgrid .card{margin:0;min-width:0}
 .pgrid h3{margin:0 0 8px;font-size:15px}.pgrid .hint{font-size:12px;color:var(--mut);margin:-4px 0 8px}
 @media (min-width:900px){.pgrid{grid-template-columns:1fr 1fr}.pgrid .span2{grid-column:span 2}}
+#mSide{display:none}
+.lg2{margin-top:3px;padding-top:3px;border-top:1px solid var(--line)}.lg2 .sq{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 3px 0 6px;vertical-align:-1px;border:1.5px solid #ffe14d}
+@media (min-width:1000px){
+ nav{top:calc(52px + env(safe-area-inset-top));bottom:0;left:0;right:auto;width:200px;flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:10px 8px;gap:2px}
+ nav button{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:11px 14px;font-size:14px;border-radius:9px}
+ nav button.on{background:var(--pri2)}
+ main{left:200px;bottom:0}
+ #mSide{display:block;flex:0 0 310px;overflow:auto;background:var(--card);border-right:1px solid var(--line);padding:14px 14px 20px;order:-1}
+ .talmode #mSide{display:none}
+ .mapwrap:not(.talmode) .legend{left:322px}
+ .sdT{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:4px 0 8px}
+ .sdK{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+ .sdK div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:12px;color:var(--mut);line-height:1.25}
+ .sdK b{display:block;font-size:22px;color:var(--fg);margin-bottom:2px}
+ .sdR{display:flex;align-items:center;gap:9px;width:100%;border:0;border-bottom:1px solid var(--line);background:none;color:var(--fg);padding:8px 4px;text-align:left;font-size:13.5px;cursor:pointer}
+ .sdR:hover{background:var(--pri2)}
+ .sdR .sq{flex:0 0 14px;height:14px;border-radius:4px;border:1.5px solid #c9b23a}
+ .sdR b{flex:0 0 58px}.sdR span:last-child{color:var(--mut);font-size:12.5px}
+}
 .tw{overflow-x:auto}.tw.sc{max-height:360px;overflow-y:auto}
 .tw table th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:600;color:var(--mut);font-size:12px;padding:4px 6px;border-bottom:1px solid var(--line)}
 .tw table td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}.tw td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -855,6 +874,7 @@ details summary{cursor:pointer;margin-top:12px}
    <select id="fModo"><option value="pts">Pontos</option><option value="heat">Mapa de calor</option><option value="ambos">Pontos + calor</option></select>
   </div>
   <div class="mapwrap" id="mapwrap">
+   <aside id="mSide"></aside>
    <div id="map"></div>
    <div class="chip" id="dist">Buscando GPS…</div>
    <div class="fab">
@@ -1216,7 +1236,7 @@ function go(v){VIEW=v;var navv=v==="ocor"?"talhoes":v==="reg"?(S.talSel?"talhoes
   if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();if(v==="plano")renderPlano();if(v==="mais"){offInfo();var nt=tilesFazenda().length;if(nt)$("offN").textContent=nt.toLocaleString("pt-BR")}
   $("main").scrollTop=0;header()}
 document.querySelector("main").id="main";
-document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){if(b.dataset.v==="mapa"||b.dataset.v==="talhoes")S.talSel=null;go(b.dataset.v);if(b.dataset.v==="mapa")fitAll()}});
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){if(b.dataset.v==="mapa"||b.dataset.v==="talhoes")S.talSel=null;go(b.dataset.v);if(b.dataset.v==="mapa")setTimeout(fitAll,90)}});
 $("hBack").onclick=function(){if(S.picking){var v=S.picking;S.picking=null;$("dist").style.background="";$("dist").style.color="";go(v);posForm();return}if(VIEW==="ocor"){fimPonto()}else if(VIEW==="reg"){go(VOLTA||"talhoes")}else if(VIEW==="mapa"&&S.talSel){S.talSel=null;go("talhoes")}else if(VIEW==="plano"){go(VOLTA_PL||"mais")}};
 function abrirTalhao(n){S.talSel=n;go("mapa");fitTal()}
 
@@ -1260,7 +1280,7 @@ function initMap(){
   layers.sat.addTo(map);
   ptLayer=L.layerGroup().addTo(map);
   map.on("click",function(e){if(S.picking)pickAt(e.latlng)});
-  map.on("zoomend",function(){$("map").classList.toggle("nolbl",map.getZoom()<13)});$("map").classList.toggle("nolbl",map.getZoom()<13);
+  function lbls(){var z=map.getZoom();$("map").classList.toggle("nolbl",z<14);$("map").classList.toggle("nolbl2",z<12)}map.on("zoomend",lbls);lbls();
   map.on("moveend",function(){var m=map.getCenter();lsSet("ml_center",JSON.stringify({lat:m.lat,lng:m.lng,z:map.getZoom()}))});
   $("bLayer").onclick=function(){baseSat=!baseSat;map.removeLayer(baseSat?layers.osm:layers.sat);(baseSat?layers.sat:layers.osm).addTo(map);toast(baseSat?"Satélite":"Mapa de ruas")};
   $("bMe").onclick=function(){if(S.fix)map.setView([S.fix.lat,S.fix.lng],Math.max(map.getZoom(),16));else toast("Aguardando sinal do GPS")};
@@ -1283,7 +1303,7 @@ function renderMap(){
   var rs=filtrados(),modo=S.talSel?"pts":$("fModo").value;
   if(modo!=="heat")rs.slice().sort(function(a,b){return(a.nivel||0)-(b.nivel||0)}).forEach(function(r){L.marker([r.lat,r.lng],{icon:icone(r)}).bindPopup(popup(r)).addTo(ptLayer)});
   if(modo!=="pts"&&L.heatLayer){var hd=heatData(rs);heatLayer=L.heatLayer(hd.pts,{radius:30,blur:22,maxZoom:17,max:1,gradient:hd.grad}).addTo(map)}
-  setLegend(modo!=="pts"&&!S.talSel?heatData(rs):null)
+  setLegend(modo!=="pts"&&!S.talSel?heatData(rs):null);drawTalStyle();renderSide()
 }
 /* ---------- mapa de calor ---------- */
 var RDENS=200;var GRAD_INF={.3:"#e3c22b",.6:"#ef8a1f",1:"#d7392f"},GRAD_APL={.3:"#9ecbff",.6:"#4d9be6",1:"#1a5fb4"};
@@ -1301,7 +1321,8 @@ function heatData(rs){var b=S.hBase,o={base:b,pts:[],grad:GRAD_INF,max:1,n:0};
   o.pts=m.filter(function(r){return r.nivel>0}).map(function(r){return[r.lat,r.lng,r.nivel/3]});o.raw=m;return o}
 function gradCss(g){return"linear-gradient(90deg,"+(g===GRAD_APL?"#cfe5ff,#4d9be6,#1a5fb4":"#f3e7a1,#e3c22b,#ef8a1f,#d7392f")+")"}
 function setLegend(hd){var el=$("legend");
-  if(!hd){el.innerHTML='<span class="dot" style="background:var(--z)"></span>Ausente <span class="dot" style="background:var(--b)"></span>Baixo <span class="dot" style="background:var(--m)"></span>Médio <span class="dot" style="background:var(--a)"></span>Alto';return}
+  if(!hd){el.innerHTML='<span class="dot" style="background:var(--z)"></span>Ausente <span class="dot" style="background:var(--b)"></span>Baixo <span class="dot" style="background:var(--m)"></span>Médio <span class="dot" style="background:var(--a)"></span>Alto'+
+    (S.talSel?"":'<div class="lg2">Talhão (pior nível):'+RISCO.map(function(c,i){return'<span class="sq" style="background:'+c+';border-color:'+c+'"></span>'+RISCO_TXT[i]}).join("")+'<span class="sq"></span>Sem monitoramento</div>');return}
   var t=hd.base==="dens"?(S.hDens==="todos"?"Pontos monitorados":"Pontos com ocorrência")+": 1 → "+hd.max+" num raio de "+RDENS+" m":hd.base==="apl"?"Aplicações feitas ("+hd.n+")":hd.base==="cont"?"Contagem"+(S.hInd?" · "+esc(S.hInd.replace(/ \(.*\)$/,"")):"")+": 0 → "+br(Math.round(hd.max*100)/100)+" "+esc(hd.un||""):"Nível de infestação: baixo → alto";
   el.innerHTML='<div>'+t+'</div><div class="hbar" style="background:'+gradCss(hd.grad)+'"></div>'}
 function fillHeatPanel(){var alvos=uniq(S.all.filter(function(r){return S.hBase==="apl"?regDe(r)==="aplicacao":regDe(r)==="monitoramento"}).map(function(r){return r.alvo}));
@@ -1360,9 +1381,20 @@ function fitAll(){if(!map)return;var b=[];filtrados().forEach(function(r){b.push
 function fitTal(){if(!map||!talLayer)return;var b=null;talLayer.eachLayer(function(l){if(l.feature&&nomeTal(l.feature)===S.talSel){b=b?b.extend(l.getBounds()):L.latLngBounds(l.getBounds().getSouthWest(),l.getBounds().getNorthEast())}});
   filtrados().forEach(function(r){b=b?b.extend([r.lat,r.lng]):L.latLngBounds([r.lat,r.lng],[r.lat,r.lng])});
   if(b)map.fitBounds(b,{paddingTopLeft:[20,50],paddingBottomRight:[60,120],maxZoom:17})}
-function drawTalStyle(){if(!talLayer)return;talLayer.eachLayer(function(l){var sel=S.talSel&&l.feature&&nomeTal(l.feature)===S.talSel;
-  l.setStyle(S.talSel?(sel?{color:"#fff",weight:3,fillOpacity:0}:{color:"#ffe14d",weight:1,opacity:.45,fillColor:"#000",fillOpacity:.25}):{color:"#ffe14d",weight:2,opacity:1,fillOpacity:.04});
-  var tt=l.getTooltip&&l.getTooltip();if(tt&&tt.getElement()){tt.getElement().classList.toggle("sel",!!sel)}})}
+var RISCO=["#4fae55","#e3c22b","#ef8a1f","#d7392f"],RISCO_TXT=["Sem praga","Baixo","Médio","Alto"];
+function riscoTal(){var m={};if(S.talSel)return m;filtrados().forEach(function(r){if(regDe(r)!=="monitoramento"||!r.talhao)return;var x=m[r.talhao]=m[r.talhao]||{mx:0,pts:{},ult:"",n:0};
+  x.mx=Math.max(x.mx,r.nivel||0);x.pts[r.ponto||r.id]=1;if((r.data||"")>x.ult)x.ult=r.data||""});Object.keys(m).forEach(function(k){m[k].n=Object.keys(m[k].pts).length});return m}
+function drawTalStyle(){if(!talLayer)return;var RK=riscoTal();talLayer.eachLayer(function(l){var n=l.feature&&nomeTal(l.feature),sel=S.talSel&&n===S.talSel,rk=!S.talSel&&RK[n];
+  l.setStyle(S.talSel?(sel?{color:"#fff",weight:3,fillOpacity:0}:{color:"#ffe14d",weight:1,opacity:.45,fillColor:"#000",fillOpacity:.25}):rk?{color:"#ffe14d",weight:2,opacity:1,fillColor:RISCO[rk.mx],fillOpacity:.42}:{color:"#ffe14d",weight:1.5,opacity:.85,fillOpacity:.04});
+  var tt=l.getTooltip&&l.getTooltip();if(tt&&tt.getElement()){tt.getElement().classList.toggle("sel",!!sel);tt.getElement().classList.toggle("tem",!!rk)}})}
+function renderSide(){var el=$("mSide");if(!el||S.talSel)return;var RK=riscoTal(),info=infoTalhoes(),nomes=Object.keys(info),per=$("fPer");
+  var mon=nomes.filter(function(n){return RK[n]}),pts=mon.reduce(function(a,n){return a+RK[n].n},0),alto=mon.filter(function(n){return RK[n].mx===3}).length;
+  var ord=mon.slice().sort(function(a,b){return RK[b].mx-RK[a].mx||(RK[b].ult>RK[a].ult?1:RK[b].ult<RK[a].ult?-1:0)||natCmp(a,b)}).concat(nomes.filter(function(n){return!RK[n]}).sort(natCmp));
+  el.innerHTML='<div class="sdT">Resumo · '+esc(per.options[per.selectedIndex].text)+'</div><div class="sdK"><div><b>'+pts+'</b>pontos monitorados</div><div><b>'+mon.length+'<small style="font-size:14px;color:var(--mut)">/'+nomes.length+'</small></b>talhões monitorados</div>'+
+    '<div><b style="color:'+(alto?"var(--a)":"var(--fg)")+'">'+alto+'</b>talhões em nível alto</div><div><b>'+(nomes.length-mon.length)+'</b>sem monitoramento</div></div>'+
+    '<div class="sdT">Talhões</div>'+ord.map(function(n){var r=RK[n];return'<button type="button" class="sdR" data-t="'+esc(n)+'" title="Clique para ver no mapa · duplo clique abre o talhão"><span class="sq" style="'+(r?"background:"+RISCO[r.mx]+";border-color:"+RISCO[r.mx]:"")+'"></span><b>'+esc(n)+'</b><span>'+
+      (r?RISCO_TXT[r.mx]+" · "+r.n+" ponto"+(r.n>1?"s":"")+" · "+fmtD(r.ult).slice(0,5):"sem monitoramento")+'</span></button>'}).join("")||'<p class="muted">Nenhum talhão nesta fazenda.</p>';
+  el.querySelectorAll(".sdR").forEach(function(b){b.onclick=function(){fitTalNome(b.dataset.t)};b.ondblclick=function(){abrirTalhao(b.dataset.t)}})}
 $("fAut").onchange=function(){renderMap();$("hAut").value=$("fAut").value};$("hAut").onchange=function(){$("fAut").value=$("hAut").value;renderHist();renderMap()};
 ["fPer","fTal","fAlvo","fModo"].forEach(function(id){$(id).onchange=function(){renderMap();lsSet("ml_"+id,$(id).value)}});
 function updDist(){var el=$("dist");if(!S.talSel)return;
