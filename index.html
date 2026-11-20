@@ -921,8 +921,7 @@ details summary{cursor:pointer;margin-top:12px}
 
    <div class="card">
     <label style="margin-top:0">Observações</label><textarea id="obs"></textarea>
-    <label>Foto</label><input type="file" id="foto" accept="image/*" capture="environment">
-    <div id="photoPrev"></div>
+    <div class="hide"><input type="file" id="foto" accept="image/*"><div id="photoPrev"></div></div><!-- fotos desativadas para não ocupar a nuvem -->
    </div>
    <div class="sticky"><button class="btn p full" type="submit" id="bSalvar">Salvar</button></div>
    <button class="btn full" type="button" id="bOutro" style="margin-top:8px">Salvar e lançar outro alvo neste ponto</button>
@@ -1433,7 +1432,7 @@ $("form").onsubmit=function(e){e.preventDefault();var mais=outro;outro=false;
   if(m==="aplicacao"&&!$("produto").value.trim()){toast("Informe o produto");return}
   var pla=m==="plantio"?calcPla():null;if(m==="plantio"&&!pla.pm){toast(S.pModo==="dist"?"Lance pelo menos 2 distâncias":"Informe plantas e metros");return}
   var r={id:id||uid(),reg:m,data:$("data").value,lat:lat,lng:lng,precisao:old?old.precisao:(S.acc!=null?Math.round(S.acc):null),
-    talhao:$("talhao").value.trim(),cultura:$("cultura").value.trim(),estadio:$("estadio").value.trim(),obs:$("obs").value.trim(),foto:S.foto,
+    talhao:$("talhao").value.trim(),cultura:$("cultura").value.trim(),estadio:$("estadio").value.trim(),obs:$("obs").value.trim(),foto:null,
     criado:old?old.criado:new Date().toISOString(),alterado:new Date().toISOString()};
   if(teste||(old&&old.teste))r.teste=true;
   if(manual||(old&&old.posManual))r.posManual=true;
@@ -1662,7 +1661,7 @@ function sincronizar(auto){if(sincRodando)return Promise.resolve();
     var pend=a.filter(function(r){return r.pend}),lotes=[];for(var i=0;i<pend.length;i+=15)lotes.push(pend.slice(i,i+15));
     var p=Promise.resolve();
     lotes.forEach(function(l){p=p.then(function(){
-      var rows=l.map(function(r){var d=limpa(r);if(!d.autorNome&&!d.apagado){d.autorNome=U.nome;d.autor=U.id;d.autorEmail=U.email}
+      var rows=l.map(function(r){var d=limpa(r);delete d.foto;if(!d.autorNome&&!d.apagado){d.autorNome=U.nome;d.autor=U.id;d.autorEmail=U.email}
         return{id:r.id,dados:d,autor_nome:d.autorNome||null,alterado:d.alterado||new Date().toISOString(),apagado:!!d.apagado}});
       return api("/rest/v1/registros?on_conflict=id",{m:"POST",b:rows,h:{Prefer:"resolution=merge-duplicates,return=minimal"},tempo:60000})
         .then(function(){return getAll()}).then(function(cur){var w=Promise.resolve();
