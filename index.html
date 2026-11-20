@@ -762,11 +762,23 @@ th{color:var(--mut);font-weight:500}
 .aqui{background:var(--pri);color:var(--onpri);border-color:var(--pri)}
 .aqui .i,.aqui .go{color:inherit;opacity:.9}
 .hide{display:none!important}
-#login{position:fixed;inset:0;z-index:3000;background:var(--bg);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:calc(40px + env(safe-area-inset-top)) 16px 24px}
-#login .lbox{width:100%;max-width:380px}
-#login h2{margin:6px 0 4px;color:var(--pri)}
-#login .llogo{font-size:44px}
-#login .btn.full{margin-top:14px}
+#login{position:fixed;inset:0;z-index:3000;background:#12301a;overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+#login .lbg{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+#login::before{content:"";position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,rgba(8,28,14,.55) 0%,rgba(8,28,14,.15) 38%,rgba(8,28,14,.55) 100%);pointer-events:none}
+#login .lbox{position:relative;z-index:1;width:100%;max-width:400px;background:rgba(255,255,255,.93);color:#1d2a1f;border-radius:18px;padding:26px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#login .lhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+#login .llogo{width:52px;height:52px;border-radius:14px;flex:0 0 auto;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+#login h2{margin:0;color:#1f5a2c;font-size:21px;line-height:1.15}
+#login .lsub{font-size:13px;color:#647066;margin-top:2px}
+#login .muted{color:#4d5b50;font-size:13.5px;margin:6px 0 4px}
+#login label{color:#4d5b50;font-weight:600}
+#login input{background:#fff;color:#1d2a1f;border:1px solid #cfd8cd;border-radius:10px;padding:12px}
+#login input:focus{outline:2px solid #2f6b3a;outline-offset:0;border-color:#2f6b3a}
+#login .lsen{position:relative}#login .lsen input{padding-right:78px}
+#login .lsen button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:#2f6b3a;font-weight:600;font-size:13px;padding:8px}
+#login .btn.p{background:#2f6b3a;border-color:#2f6b3a;color:#fff;border-radius:10px;padding:13px;font-weight:600;font-size:16px}
+#login .lrod{margin-top:16px;padding-top:12px;border-top:1px solid #e1e7df;font-size:12px;color:#7a867d;text-align:center}
+#login .btn.full{margin-top:18px}
 #lErr{margin-top:10px;color:var(--a);font-size:14px}
 .sinc{font-size:14px;line-height:1.5}
 .ctx{display:flex;gap:8px;margin-bottom:10px}.ctx select{flex:1}
@@ -1065,14 +1077,15 @@ details summary{cursor:pointer;margin-top:12px}
  <button data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Dados</button>
 </nav>
 <div id="toast"></div>
-<div id="login" class="hide"><div class="lbox">
- <div class="llogo">🌱</div><h2>Monitor de Lavoura</h2>
+<div id="login" class="hide"><svg class="lbg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="gc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f6e8f"/><stop offset=".55" stop-color="#e9b873"/><stop offset="1" stop-color="#f6d9a0"/></linearGradient><radialGradient id="gs" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3c9" stop-opacity=".95"/><stop offset="1" stop-color="#fff3c9" stop-opacity="0"/></radialGradient><linearGradient id="gh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d9a0" stop-opacity=".85"/><stop offset="1" stop-color="#f6d9a0" stop-opacity="0"/></linearGradient><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c3d1c" stop-opacity=".0"/><stop offset="1" stop-color="#0d2410" stop-opacity=".55"/></linearGradient></defs><rect width="400" height="400" fill="url(#gc)"/><circle cx="262" cy="372" r="120" fill="url(#gs)"/><circle cx="262" cy="376" r="22" fill="#fff6d6"/><path d="M0 372c40-16 80-10 120-4s90 8 140-2 90-8 140 0V400H0z" fill="#7c9a73" opacity=".55"/><path d="M0 386c60-10 110-4 170 0s120 2 230-6V400H0z" fill="#4f7a49" opacity=".8"/><polygon points="200,392 -1400,800 -1300,800" fill="#3d7a38"/><polygon points="200,392 -1300,800 -1200,800" fill="#4b8c43"/><polygon points="200,392 -1200,800 -1100,800" fill="#3d7a38"/><polygon points="200,392 -1100,800 -1000,800" fill="#4b8c43"/><polygon points="200,392 -1000,800 -900,800" fill="#3d7a38"/><polygon points="200,392 -900,800 -800,800" fill="#4b8c43"/><polygon points="200,392 -800,800 -700,800" fill="#3d7a38"/><polygon points="200,392 -700,800 -600,800" fill="#4b8c43"/><polygon points="200,392 -600,800 -500,800" fill="#3d7a38"/><polygon points="200,392 -500,800 -400,800" fill="#4b8c43"/><polygon points="200,392 -400,800 -300,800" fill="#3d7a38"/><polygon points="200,392 -300,800 -200,800" fill="#4b8c43"/><polygon points="200,392 -200,800 -100,800" fill="#3d7a38"/><polygon points="200,392 -100,800 0,800" fill="#4b8c43"/><polygon points="200,392 0,800 100,800" fill="#3d7a38"/><polygon points="200,392 100,800 200,800" fill="#4b8c43"/><polygon points="200,392 200,800 300,800" fill="#3d7a38"/><polygon points="200,392 300,800 400,800" fill="#4b8c43"/><polygon points="200,392 400,800 500,800" fill="#3d7a38"/><polygon points="200,392 500,800 600,800" fill="#4b8c43"/><polygon points="200,392 600,800 700,800" fill="#3d7a38"/><polygon points="200,392 700,800 800,800" fill="#4b8c43"/><polygon points="200,392 800,800 900,800" fill="#3d7a38"/><polygon points="200,392 900,800 1000,800" fill="#4b8c43"/><polygon points="200,392 1000,800 1100,800" fill="#3d7a38"/><polygon points="200,392 1100,800 1200,800" fill="#4b8c43"/><polygon points="200,392 1200,800 1300,800" fill="#3d7a38"/><polygon points="200,392 1300,800 1400,800" fill="#4b8c43"/><polygon points="200,392 1400,800 1500,800" fill="#3d7a38"/><polygon points="200,392 1500,800 1600,800" fill="#4b8c43"/><polygon points="200,392 1600,800 1700,800" fill="#3d7a38"/><polygon points="200,392 1700,800 1800,800" fill="#4b8c43"/><rect y="380" width="400" height="70" fill="url(#gh)"/><rect y="392" width="400" height="408" fill="url(#gf)"/></svg><div class="lbox">
+ <div class="lhead"><img class="llogo" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22112%22 fill=%22%23f4f6f2%22/%3E%3Cpath d=%22M256 452s-140-128-140-238a140 140 0 0 1 280 0c0 110-140 238-140 238z%22 fill=%22%232f6b3a%22/%3E%3Cpath d=%22M256 300c-6-70 26-118 92-130-2 74-38 122-92 130z%22 fill=%22%239fd36b%22/%3E%3Cpath d=%22M256 300c-6-60-34-96-86-104 0 58 30 98 86 104z%22 fill=%22%236fbf7d%22/%3E%3Cpath d=%22M256 300v-40%22 stroke=%22%239fd36b%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22370%22 cy=%22120%22 r=%2244%22 fill=%22%23ef8a1f%22/%3E%3Ccircle cx=%22370%22 cy=%22120%22 r=%2216%22 fill=%22%23fff%22/%3E%3C/svg%3E"><div><h2>Monitor de Lavoura</h2><div class="lsub">Pragas, doenças e manejo no campo</div></div></div>
  <p class="muted" id="lMsg"></p>
  <div id="lCred"><label for="lEmail">E-mail</label><input id="lEmail" type="email" autocomplete="username" inputmode="email" autocapitalize="off">
-  <label for="lSenha">Senha</label><input id="lSenha" type="password" autocomplete="current-password"></div>
+  <label for="lSenha">Senha</label><div class="lsen"><input id="lSenha" type="password" autocomplete="current-password"><button type="button" id="lOlho" aria-label="Mostrar senha">Mostrar</button></div></div>
  <div id="lNomeBox" class="hide"><label for="lNome">Seu nome (aparece em cada registro)</label><input id="lNome" autocomplete="name"></div>
  <button type="button" class="btn p full" id="lBtn">Entrar</button>
  <div id="lErr"></div>
+ <div class="lrod">Acesso restrito à equipe · seus dados ficam salvos no aparelho, mesmo sem internet</div>
 </div></div>
 <datalist id="dlTal"></datalist><datalist id="dlAlvo"></datalist><datalist id="dlAlvoAll"></datalist><datalist id="dlProd"></datalist><datalist id="dlEst"></datalist>
 <datalist id="dlUn"><option>lagartas/pano</option><option>percevejos/pano</option><option>adultos/folíolo</option><option>ninfas/folíolo</option><option>% folíolos com ninfas</option><option>% folíolos minados</option><option>minas/folíolo</option><option>insetos/pano</option><option>insetos/planta</option><option>% plantas atacadas</option><option>% desfolha</option><option>% severidade</option><option>% incidência</option><option>insetos/armadilha</option><option>plantas/m²</option></datalist>
@@ -1727,6 +1740,7 @@ $("lBtn").onclick=function(){var b=$("lBtn");$("lErr").textContent="";
     if(!U.nome){mostraLogin();return}fechaLogin();toast("Olá, "+U.nome.split(" ")[0])})
    .catch(function(e){$("lErr").textContent=e.rede?"Sem internet. O primeiro acesso precisa de sinal.":/invalid/i.test(e.message)?"E-mail ou senha incorretos.":"Erro: "+e.message})
    .then(function(){b.disabled=false;if(lPasso==="cred")b.textContent="Entrar"})};
+$("lOlho").onclick=function(){var i=$("lSenha"),v=i.type==="password";i.type=v?"text":"password";this.textContent=v?"Ocultar":"Mostrar"};
 ["lEmail","lSenha","lNome"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter")$("lBtn").click()})});
 
 /* sincronização: envia pendentes, depois baixa o que mudou na nuvem */
