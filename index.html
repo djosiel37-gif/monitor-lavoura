@@ -789,7 +789,38 @@ th{color:var(--mut);font-weight:500}
 .pbulk{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.pbulk select{width:auto}
 .lock{font-size:12px;color:var(--mut);margin-top:4px}
 .pad.wide{max-width:1280px}
-.pfil{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.pfil select{width:auto;flex:1 1 130px}
+.ptop{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+#pResumo{flex:1 1 220px;min-width:0;font-size:13px;color:var(--mut)}#pResumo b{color:var(--fg)}
+#pPrintH{display:none}
+.pbt{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:9px;padding:7px 11px;font-size:13px;position:relative;cursor:pointer}
+.pbt svg{width:17px;height:17px}.pbt.ic{padding:7px 8px}.pbt.on{background:var(--pri);border-color:var(--pri);color:var(--onpri)}
+.pbt i{display:none;position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--a);border:2px solid var(--card)}.pbt.ativo i{display:block}
+@media (max-width:560px){.pbt span{display:none}.pbt{padding:7px 8px}}
+.kpi.al{border-color:#f0b9b4;background:linear-gradient(0deg,rgba(215,57,47,.06),rgba(215,57,47,.06)),var(--card)}.kpi.al .kv{color:var(--a)}
+.kpi .kd{font-size:11.5px;margin-top:3px;color:var(--mut)}.kpi .kd.bom{color:#2e8a3e}.kpi .kd.ruim{color:var(--a)}
+#pMap{height:340px;border-radius:10px;overflow:hidden;background:#5d6b5a}
+.plg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mut);margin-top:8px}.plg span{display:inline-flex;align-items:center;gap:5px}.plg i{width:12px;height:12px;border-radius:3px;border:1.5px solid #c9b23a;display:inline-block}
+.cobk{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 8px}.cobk div{border:1px solid var(--line);border-radius:9px;padding:7px 8px;font-size:11.5px;color:var(--mut);line-height:1.2}.cobk b{display:block;font-size:20px;color:var(--fg)}
+.pdet summary{cursor:pointer;color:var(--pri);font-size:13px;font-weight:600;padding:4px 0}
+.pfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px}.pfoot .muted{font-size:12px}
+@media print{
+ @page{size:A4;margin:12mm}
+ html,body{height:auto!important;overflow:visible!important;background:#fff!important}
+ header,nav,#toast,#login,.pbt,.pfil,.pfoot .btn,#pTip{display:none!important}
+ main{position:static!important;overflow:visible!important}
+ .view{display:none!important}#v-painel{display:block!important}
+ #pPrintH{display:block;font-size:20px;font-weight:700;color:#1f5a2c;width:100%}
+ #pResumo{font-size:12px;color:#333}
+ .card,.kpi{break-inside:avoid;box-shadow:none}
+ .tw.sc{max-height:none!important;overflow:visible!important}
+ details.pdet>summary{display:none}
+ .pgrid{grid-template-columns:1fr!important}.pgrid .span2{grid-column:auto!important}
+ .kpis{grid-template-columns:repeat(3,1fr)!important}
+ .pad.wide{max-width:none!important;padding:0!important}
+ #pMap{width:680px!important;height:300px!important}
+ .leaflet-control-zoom{display:none!important}
+}
+.imprimindo #pMap{width:680px!important;height:300px!important}.pfil select{width:auto;flex:1 1 130px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
 .kpi .kl{font-size:12px;color:var(--mut)}.kpi .kv{font-size:26px;font-weight:700;line-height:1.2;margin-top:2px}.kpi .ks{font-size:12px;color:var(--mut)}
@@ -987,7 +1018,11 @@ details summary{cursor:pointer;margin-top:12px}
 
  <!-- painel do supervisor -->
  <section id="v-painel" class="view"><div class="pad wide">
-  <div class="pfil">
+  <div class="ptop"><div id="pPrintH">Relatório de monitoramento</div><div id="pResumo"></div>
+   <button type="button" class="pbt" id="pFiltBtn" title="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></svg><span>Filtros</span><i></i></button>
+   <button type="button" class="pbt" id="pPdf" title="Exportar relatório em PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v7H7z"/></svg><span>Exportar PDF</span></button>
+   <button type="button" class="pbt ic" id="pPlano" title="Fazendas, safra e cultura dos talhões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+  <div class="pfil hide" id="pFil">
    <select id="pFaz"></select><select id="pSafra"></select>
    <select id="pPer"><option value="7">Últimos 7 dias</option><option value="15">Últimos 15 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="0">Tudo</option></select>
    <select id="pCult"><option value="">Todas culturas</option><option>Soja</option><option>Milho</option></select>
@@ -995,20 +1030,19 @@ details summary{cursor:pointer;margin-top:12px}
    <select id="pAut"><option value="">Todos técnicos</option></select>
    <select id="pCob"><option value="5">Monitorar a cada 5 dias</option><option value="7" selected>Monitorar a cada 7 dias</option><option value="10">Monitorar a cada 10 dias</option><option value="14">Monitorar a cada 14 dias</option></select>
   </div>
-  <div class="muted" id="pInfo" style="margin:-2px 0 10px"></div>
-  <button type="button" class="btn full" id="pPlano" style="margin-bottom:10px">Fazendas, safra e cultura dos talhões</button>
   <div class="kpis" id="pKpi"></div>
   <div class="pgrid">
+   <div class="card span2"><h3>Mapa de risco</h3><p class="hint">Cada talhão pintado pelo pior nível encontrado no período e filtros escolhidos.</p><div id="pMap"></div><div class="plg" id="pMapLg"></div></div>
    <div class="card"><h3>Equipe</h3><div class="tw" id="pEquipe"></div></div>
    <div class="card"><h3>Pontos monitorados por dia</h3><div id="pDias"></div></div>
    <div class="card"><h3>Talhões críticos</h3><p class="hint">Talhões com mais pontos em nível Alto no período.</p><div class="tw" id="pCrit"></div></div>
-   <div class="card"><h3>Cobertura</h3><p class="hint" id="pCobH"></p><div class="tw sc" id="pCobT"></div></div>
+   <div class="card"><h3>Cobertura</h3><p class="hint" id="pCobH"></p><div class="cobk" id="pCobK"></div><details class="pdet"><summary>Ver lista por talhão</summary><div class="tw sc" id="pCobT"></div></details></div>
    <div class="card span2"><h3>Pragas, doenças e daninhas por talhão</h3><p class="hint">Nível 0 ausente · 1 baixo · 2 médio · 3 alto. Tendência compara os últimos 7 dias com os 7 dias anteriores.</p><div class="tw sc" id="pPrag"></div></div>
    <div class="card"><h3>Aplicações</h3><div class="tw sc" id="pApl"></div></div>
    <div class="card"><h3>Plantio</h3><div class="tw sc" id="pPla"></div></div>
    <div class="card span2"><h3>Estádio atual por talhão</h3><div class="tw sc" id="pEst"></div></div>
   </div>
-  <button type="button" class="btn p full" id="pAtual" style="margin-top:12px">Atualizar dados da equipe</button>
+  <div class="pfoot"><span class="muted" id="pInfo"></span><button type="button" class="btn p" id="pAtual">Atualizar dados da equipe</button></div>
  </div><div id="pTip"></div></section>
 
  <!-- plano: fazenda, safra e culturas (supervisor) -->
@@ -1236,7 +1270,7 @@ function go(v){VIEW=v;var navv=v==="ocor"?"talhoes":v==="reg"?(S.talSel?"talhoes
   document.querySelector("#v-mapa .bar").classList.toggle("hide",!!S.talSel||!S.filtOn);
   if(v==="mapa"&&map){setTimeout(function(){map.invalidateSize()},50);renderMap();drawTalStyle();updDist()}
   if(v==="hist")renderHist();if(v==="talhoes")renderTalhoes();if(v==="painel")renderPainel();if(v==="plano")renderPlano();if(v==="mais"){offInfo();var nt=tilesFazenda().length;if(nt)$("offN").textContent=nt.toLocaleString("pt-BR")}
-  $("main").scrollTop=0;header()}
+  $("main").scrollTop=0;header();$("cnt").style.visibility=v==="painel"?"hidden":"";if(v==="painel"&&pMap)setTimeout(function(){pMap.invalidateSize();pMapFit()},60)}
 document.querySelector("main").id="main";
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){if(b.dataset.v==="mapa"||b.dataset.v==="talhoes")S.talSel=null;go(b.dataset.v);if(b.dataset.v==="mapa")setTimeout(fitAll,90)}});
 $("hBack").onclick=function(){if(S.picking){var v=S.picking;S.picking=null;$("dist").style.background="";$("dist").style.color="";go(v);posForm();return}if(VIEW==="ocor"){fimPonto()}else if(VIEW==="reg"){go(VOLTA||"talhoes")}else if(VIEW==="mapa"&&S.talSel){S.talSel=null;go("talhoes")}else if(VIEW==="plano"){go(VOLTA_PL||"mais")}};
@@ -1967,13 +2001,22 @@ function renderPainel(){if(!$("v-painel"))return;
   var cobL=(ta?[ta]:tals).map(function(t){return{t:t,d:diasDesde(ult[t])}});
   var atras=cobL.filter(function(c){return c.d==null||c.d>cob}).length;
   $("pInfo").textContent="Dados da equipe recebidos: "+quando(lsGet("ml_ultSinc"))+". Registros de teste não entram no painel.";
-  var K=[["Pontos monitorados",pts.length,mon.length+" ocorrências lançadas"],
-    ["Talhões monitorados",talMon.length,"de "+(ta?1:tals.length)+" talhões"],
-    ["Técnicos em campo",tecs.length,tecs.slice(0,3).join(", ")+(tecs.length>3?"…":"")],
-    ["Pontos em nível Alto",pts.length?Math.round(nA/pts.length*100)+"%":"–",nA+" de "+pts.length+" pontos"],
-    ["Aplicações",apl.length,(function(n){return n+(n===1?" talhão":" talhões")})(uniq(apl.map(function(r){return r.talhao})).length)],
-    ["Talhões atrasados",atras,"sem monitorar há mais de "+cob+" dias"]];
-  $("pKpi").innerHTML=K.map(function(k){return'<div class="kpi"><div class="kl">'+k[0]+'</div><div class="kv">'+k[1]+'</div><div class="ks">'+esc(k[2])+'</div></div>'}).join("");
+  var ant=null;if(per){var RA=base.filter(function(r){return noAnterior(r,per)&&(!ta||r.talhao===ta)}),PA={};
+    RA.forEach(function(r){if(regDe(r)!=="monitoramento")return;var k=r.ponto||r.id,p=PA[k]=PA[k]||{tal:r.talhao,niv:0};p.niv=Math.max(p.niv,r.nivel||0)});
+    var pa=Object.keys(PA).map(function(k){return PA[k]}),naA=pa.filter(function(p){return p.niv>=3}).length;
+    ant={pts:pa.length,tal:uniq(pa.map(function(p){return p.tal})).length,tec:uniq(RA.map(function(r){return r.autorNome||"(sem nome)"})).length,
+      alto:pa.length?Math.round(naA/pa.length*100):null,apl:RA.filter(function(r){return regDe(r)==="aplicacao"}).length}}
+  var pctA=pts.length?Math.round(nA/pts.length*100):null;
+  function dl(cur,old,subirBom,un){if(!ant||old==null||cur==null)return"";var d=cur-old;if(!d)return'<div class="kd">= igual aos '+per+' dias anteriores</div>';
+    var bom=subirBom?d>0:d<0;return'<div class="kd '+(bom?"bom":"ruim")+'">'+(d>0?"▲ +":"▼ ")+d+(un||"")+' vs. '+per+' dias anteriores</div>'}
+  var K=[["Pontos monitorados",pts.length,mon.length+" ocorrências lançadas",dl(pts.length,ant&&ant.pts,true)],
+    ["Talhões monitorados",talMon.length,"de "+(ta?1:tals.length)+" talhões",dl(talMon.length,ant&&ant.tal,true)],
+    ["Técnicos em campo",tecs.length,tecs.slice(0,3).join(", ")+(tecs.length>3?"…":""),dl(tecs.length,ant&&ant.tec,true)],
+    ["Pontos em nível Alto",pctA==null?"–":pctA+"%",nA+" de "+pts.length+" pontos",dl(pctA,ant&&ant.alto,false," p.p."),nA>0],
+    ["Aplicações",apl.length,(function(n){return n+(n===1?" talhão":" talhões")})(uniq(apl.map(function(r){return r.talhao})).length),dl(apl.length,ant&&ant.apl,null)],
+    ["Talhões atrasados",atras,"sem monitorar há mais de "+cob+" dias","",atras>0]];
+  $("pKpi").innerHTML=K.map(function(k){return'<div class="kpi'+(k[4]?" al":"")+'"><div class="kl">'+k[0]+'</div><div class="kv">'+k[1]+'</div><div class="ks">'+esc(k[2])+'</div>'+k[3].replace(' class="kd bom"',k[0]==="Aplicações"?' class="kd"':' class="kd bom"').replace(' class="kd ruim"',k[0]==="Aplicações"?' class="kd"':' class="kd ruim"')+'</div>'}).join("");
+  pResumoTxt();pMapDraw(mon);
   // equipe
   var E={};pts.forEach(function(p){var e=E[p.aut]=E[p.aut]||{n:0,t:{},d:{},u:""};e.n++;e.t[p.tal]=1;e.d[p.data]=1});
   R0.forEach(function(r){var a=r.autorNome||"(sem nome)",e=E[a]=E[a]||{n:0,t:{},d:{},u:""};if(r.data>e.u)e.u=r.data});
@@ -1993,6 +2036,8 @@ function renderPainel(){if(!$("v-painel"))return;
       return["<b>"+esc(t)+"</b>",c.n,Math.round(c.a/c.n*100)+"% ("+c.a+")",esc(Object.keys(c.al).sort(function(a,b){return c.al[b]-c.al[a]}).join(", "))]}),"Nenhum talhão com ponto em nível Alto no período.");
   // cobertura
   $("pCobH").textContent="Dias desde o último monitoramento. Meta: a cada "+cob+" dias.";
+  var cE=cobL.filter(function(c){return c.d!=null&&c.d<=cob}).length,cA=cobL.filter(function(c){return c.d!=null&&c.d>cob&&c.d<=2*cob}).length,cM=cobL.filter(function(c){return c.d!=null&&c.d>2*cob}).length,cN=cobL.filter(function(c){return c.d==null}).length;
+  $("pCobK").innerHTML='<div><b style="color:#2e8a3e">'+cE+'</b>em dia</div><div><b style="color:#ef8a1f">'+cA+'</b>atrasados</div><div><b style="color:#d7392f">'+cM+'</b>muito atrasados</div><div><b style="color:#8a9590">'+cN+'</b>nunca monitorados</div>';
   $("pCobT").innerHTML=tab([{t:"Talhão"},{t:"Último",n:1},{t:"Dias",n:1},{t:"Situação"}],
     cobL.sort(function(a,b){return(b.d==null?1e9:b.d)-(a.d==null?1e9:a.d)||natCmp(a.t,b.t)}).map(function(c){
       var st=c.d==null?stTag("#8a9590","Nunca monitorado"):c.d<=cob?stTag("#4fae55","Em dia"):c.d<=2*cob?stTag("#ef8a1f","Atrasado"):stTag("#d7392f","Muito atrasado");
@@ -2022,6 +2067,30 @@ function renderPainel(){if(!$("v-painel"))return;
   $("pEst").innerHTML=tab([{t:"Talhão"},{t:"Cultura"},{t:"Estádio"},{t:"Registrado em",n:1},{t:"Por"}],
     Object.keys(ES).sort(natCmp).map(function(t){var r=ES[t];return[esc(t),esc(r.cultura||""),"<b>"+esc(r.estadio||"")+"</b>",fmtD(r.data)+" ("+diasDesde(r.data)+" d)",esc(r.autorNome||"")]}),"Nenhum estádio registrado.")}
 ["pPer","pCult","pTal","pAut","pCob"].forEach(function(id){$(id).onchange=renderPainel});
+function noAnterior(r,dias){var d=new Date(r.data+"T12:00"),a=new Date(),b=new Date();a.setDate(a.getDate()-dias);b.setDate(b.getDate()-2*dias);return d<a&&d>=b}
+var pFilOn=false;
+function pResumoTxt(){var f=fazAt(),sel=function(id){var e=$(id);return e.options[e.selectedIndex]?e.options[e.selectedIndex].text:""};
+  var p=["<b>"+esc(f?f.nome:FAZENDA)+"</b>",esc(sel("pPer"))];if(safrasFaz().length)p.splice(1,0,esc(sel("pSafra").replace(" (atual)","")));
+  if($("pCult").value)p.push(esc($("pCult").value));if($("pTal").value)p.push("Talhão "+esc($("pTal").value));if($("pAut").value)p.push(esc($("pAut").value));p.push("meta "+$("pCob").value+" dias");
+  $("pResumo").innerHTML=p.join(" · ");
+  var at=$("pPer").value!=="30"||!!$("pCult").value||!!$("pTal").value||!!$("pAut").value||$("pCob").value!=="7"||safraVista()!==safraAtual();
+  $("pFiltBtn").classList.toggle("ativo",at);$("pFiltBtn").classList.toggle("on",pFilOn);
+  $("pPrintH").textContent="Relatório de monitoramento · gerado em "+new Date().toLocaleDateString("pt-BR")}
+$("pFiltBtn").onclick=function(){pFilOn=!pFilOn;$("pFil").classList.toggle("hide",!pFilOn);pResumoTxt()};
+$("pPdf").onclick=function(){document.body.classList.add("imprimindo");if(pMap){pMap.invalidateSize();pMapFit()}toast("Na janela de impressão, escolha \"Salvar como PDF\"");setTimeout(function(){window.print()},900)};
+addEventListener("afterprint",function(){if(!document.body.classList.contains("imprimindo"))return;document.body.classList.remove("imprimindo");if(pMap)setTimeout(function(){pMap.invalidateSize();pMapFit()},60)});
+var pMap=null,pMapTal=null,pMapB=null;
+function pMapInit(){if(pMap||typeof L==="undefined"||!$("pMap"))return;
+  pMap=L.map("pMap",{zoomControl:true,attributionControl:true,scrollWheelZoom:false});
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Imagens © Esri"}).addTo(pMap);pMap.setView([-3.5,-48.97],12)}
+function pMapFit(){if(pMap&&pMapB&&pMapB.isValid())pMap.fitBounds(pMapB,{padding:[12,12]})}
+function pMapDraw(mon){pMapInit();if(!pMap)return;if(pMapTal){pMap.removeLayer(pMapTal);pMapTal=null}
+  var M={};mon.forEach(function(r){if(!r.talhao)return;var x=M[r.talhao]=M[r.talhao]||{mx:0,p:{}};x.mx=Math.max(x.mx,r.nivel||0);x.p[r.ponto||r.id]=1});
+  $("pMapLg").innerHTML=RISCO.map(function(c,i){return'<span><i style="background:'+c+';border-color:'+c+'"></i>'+RISCO_TXT[i]+'</span>'}).join("")+'<span><i></i>Sem monitoramento</span>';
+  if(!S.tal){pMapB=null;return}
+  pMapTal=L.geoJSON(S.tal,{style:function(f){var m=M[nomeTal(f)];return m?{color:"#ffe14d",weight:1.5,fillColor:RISCO[m.mx],fillOpacity:.55}:{color:"#ffe14d",weight:1,opacity:.8,fillOpacity:.05}},
+    onEachFeature:function(f,l){var n=nomeTal(f),m=M[n];l.bindTooltip("<b>"+esc(n||"")+"</b><br>"+(m?RISCO_TXT[m.mx]+" · "+Object.keys(m.p).length+" ponto(s)":"Sem monitoramento no período"),{sticky:true})}}).addTo(pMap);
+  var nb=pMapTal.getBounds();var mudou=!pMapB||!pMapB.equals(nb);pMapB=nb;if(mudou)setTimeout(function(){pMap.invalidateSize();pMapFit()},60)}
 (function(){var v=lsGet("ml_pCob");if(v)$("pCob").value=v})();
 $("pAtual").onclick=function(){sincronizar(false)};
 $("v-painel").addEventListener("mousemove",function(e){var t=e.target.closest("[data-tip]"),tp=$("pTip");if(!t){tp.style.display="none";return}
